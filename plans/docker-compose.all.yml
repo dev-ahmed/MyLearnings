@@ -1,0 +1,50 @@
+# Run ALL plan trackers at once:  docker compose -f docker-compose.all.yml up -d --build
+services:
+  python-plan:
+    build: ./python-plan-app
+    image: python-plan:latest
+    container_name: python-plan
+    ports: ["8642:80"]
+    restart: unless-stopped
+  docker-plan:
+    build: ./docker-plan-app
+    image: docker-plan:latest
+    container_name: docker-plan
+    ports: ["8643:80"]
+    restart: unless-stopped
+  backend-infra-plan:
+    build: ./backend-infra-plan-app
+    image: backend-infra-plan:latest
+    container_name: backend-infra-plan
+    ports: ["8644:80"]
+    restart: unless-stopped
+  laravel-plan:
+    build: ./laravel-plan-app
+    image: laravel-plan:latest
+    container_name: laravel-plan
+    ports: ["8645:80"]
+    restart: unless-stopped
+  rag-plan:
+    build: ./rag-plan-app
+    image: rag-plan:latest
+    container_name: rag-plan
+    ports: ["8646:80"]
+    restart: unless-stopped
+  ml-plan:
+    build: ./ml-plan-app
+    image: ml-plan:latest
+    container_name: ml-plan
+    ports: ["8647:80"]
+    restart: unless-stopped
+  rust-plan:
+    build: ./rust-plan-app
+    image: rust-plan:latest
+    container_name: rust-plan
+    ports: ["8648:80"]
+    restart: unless-stopped
+  n8n-plan:
+    build: ./n8n-plan-app
+    image: n8n-plan:latest
+    container_name: n8n-plan
+    ports: ["8649:80"]
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+services:
+  docker-plan:
+    build: .
+    image: docker-plan:latest
+    container_name: docker-plan
+    ports:
+      - "8643:80"          # visit http://localhost:8643  (8642 is used by the Python plan)
+    restart: unless-stopped

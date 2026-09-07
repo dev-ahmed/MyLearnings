@@ -1,0 +1,8 @@
+services:
+  backend-infra-plan:
+    build: .
+    image: backend-infra-plan:latest
+    container_name: backend-infra-plan
+    ports:
+      - "8644:80"          # visit http://localhost:8644
+    restart: unless-stopped

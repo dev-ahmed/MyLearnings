@@ -1,0 +1,15 @@
+# Save this as  ~/.cloudflared/config.yml
+# Replace the UUID, the credentials path, and the two hostnames.
+# After `cloudflared tunnel create learning-plans`, the UUID + a
+# <UUID>.json credentials file are printed / placed in ~/.cloudflared/.
+
+tunnel: 00000000-0000-0000-0000-000000000000          # your tunnel UUID
+credentials-file: /Users/YOU/.cloudflared/00000000-0000-0000-0000-000000000000.json
+
+# Both plans, each on its own stable hostname:
+ingress:
+  - hostname: python.yourdomain.com
+    service: http://localhost:8642
+  - hostname: docker.yourdomain.com
+    service: http://localhost:8643
+  - service: http_status:404          # required catch-all (must be last)

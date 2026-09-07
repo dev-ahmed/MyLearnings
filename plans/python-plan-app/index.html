@@ -1,0 +1,443 @@
+<title>Python Backend Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --bg:#eceff4; --surface:#ffffff; --surface-2:#f5f7fb; --ink:#141e2c;
+  --muted:#59667a; --line:#d7dee8; --line-strong:#c2cbd8;
+  --accent:#2653d6; --accent-ink:#ffffff; --accent-soft:#e5ebfc;
+  --done:#12925a; --done-soft:#e2f2e9; --gold:#b7791f;
+  --shadow:0 1px 2px rgba(20,30,44,.06), 0 8px 24px rgba(20,30,44,.06);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1520; --surface:#151f2d; --surface-2:#1b2736; --ink:#e9eff7;
+    --muted:#94a3b7; --line:#273344; --line-strong:#34435a;
+    --accent:#6f9bff; --accent-ink:#08111e; --accent-soft:#1b2a45;
+    --done:#43c489; --done-soft:#123024; --gold:#e0aa4a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1520; --surface:#151f2d; --surface-2:#1b2736; --ink:#e9eff7;
+  --muted:#94a3b7; --line:#273344; --line-strong:#34435a;
+  --accent:#6f9bff; --accent-ink:#08111e; --accent-soft:#1b2a45;
+  --done:#43c489; --done-soft:#123024; --gold:#e0aa4a;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+
+/* ---- typography ---- */
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---- header ---- */
+header.hero{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden;
+}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--gold))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+
+/* overall progress */
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--gold)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted);
+  background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+
+/* section head */
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+
+/* principles */
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--gold); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem; color:var(--ink)}
+.principle p b{font-weight:600}
+
+/* week cards */
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em;
+  color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0;
+  border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px;
+  border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft);
+  padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent);
+  border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+
+/* checklist + resources */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px}
+@media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block}
+.reslist .d{color:var(--muted); font-size:.82rem}
+
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span>Study Plan</span><span aria-hidden="true">·</span><span>Node.js → Python</span></div>
+    <h1>Python Backend Sprint</h1>
+    <p class="lede">An eight-week, build-first plan that turns your Node.js experience into production Python — Django and FastAPI — one working project threaded through every week. Anchored to your cookbook; check things off as you go.</p>
+    <div class="chips">
+      <span class="chip">Profile: <b>Node.js dev</b></span>
+      <span class="chip">Target: <b>production backend</b></span>
+      <span class="chip">Pace: <b>~20 hrs / week</b></span>
+      <span class="chip">Length: <b>8 weeks</b></span>
+      <span class="chip">Est: <b>~160 hrs</b></span>
+    </div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles">
+    <div class="principle"><span class="n">01</span><p><b>Build, don't watch.</b> ~45 min reading the relevant book part, then 2–3 hrs building. Every day ends with code that runs.</p></div>
+    <div class="principle"><span class="n">02</span><p><b>One project, all 8 weeks.</b> The Tasks/Projects API grows each week — new layer, same app — so nothing is throwaway.</p></div>
+    <div class="principle"><span class="n">03</span><p><b>Types on from day one.</b> Keep <span class="mono">mypy</span> and <span class="mono">ruff</span> green. It's the TypeScript rigor you already have, in Python.</p></div>
+    <div class="principle"><span class="n">04</span><p><b>Commit daily.</b> Small git commits, a real README. Your repo history becomes the portfolio.</p></div>
+    <div class="principle"><span class="n">05</span><p><b>Don't tutorial-hop.</b> Follow this book end-to-end. Reach for other docs only when you hit a real wall.</p></div>
+    <div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~4 hrs/day × 5 days, one rest day. Read errors, don't fear them — the traceback names the fix.</p></div>
+  </div>
+
+  <div class="sec-head"><h2>The eight weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+
+  <div class="sec-head"><h2>Job-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">By the end you should be able to tick every box. This is the bar an interviewer or a first backend role expects.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+
+  <div class="sec-head"><h2>Reference beyond the book</h2><div class="rule"></div></div>
+  <div class="panel">
+    <ul class="reslist">
+      <li><a class="k" href="https://docs.python.org/3/tutorial/" target="_blank" rel="noopener">Python official tutorial</a><span class="d">The language, from the source</span></li>
+      <li><a class="k" href="https://fastapi.tiangolo.com/" target="_blank" rel="noopener">FastAPI docs</a><span class="d">Excellent, example-driven</span></li>
+      <li><a class="k" href="https://docs.sqlalchemy.org/en/20/orm/quickstart.html" target="_blank" rel="noopener">SQLAlchemy 2.0</a><span class="d">The ORM you pair with FastAPI</span></li>
+      <li><a class="k" href="https://docs.djangoproject.com/en/stable/" target="_blank" rel="noopener">Django docs</a><span class="d">Deep, well-written reference</span></li>
+      <li><a class="k" href="https://www.django-rest-framework.org/" target="_blank" rel="noopener">Django REST Framework</a><span class="d">Serializers, viewsets, auth</span></li>
+      <li><a class="k" href="https://docs.pytest.org/" target="_blank" rel="noopener">pytest</a><span class="d">Fixtures and the test client</span></li>
+      <li><a class="k" href="https://docs.astral.sh/uv/" target="_blank" rel="noopener">uv</a><span class="d">Your npm-equivalent toolchain</span></li>
+      <li><a class="k" href="https://realpython.com/" target="_blank" rel="noopener">Real Python</a><span class="d">High-quality deep-dive articles</span></li>
+    </ul>
+  </div>
+
+  <footer>Python Backend Sprint · progress saved in this browser · <span id="stamp"></span></footer>
+</div>
+
+<script>
+const WEEKS = [
+  { n:"WEEK 01", title:"Language, tooling & thinking in Python",
+    goal:"Read and write idiomatic, typed Python without translating in your head.",
+    read:[["Quick Start + Part 1","Language"],["Part 2","Functional"],["Part 4","Packaging"]],
+    readTasks:[
+      "Read the Quick Start and Part 1; keep the survival syntax table open",
+      "Read Part 2 (comprehensions, itertools, functools) and Part 4 (uv, venv)",
+    ],
+    build:[
+      "Set up a project with <span class='mono'>uv</span>; add <span class='mono'>ruff</span>, <span class='mono'>mypy</span>, <span class='mono'>pytest</span> — get them all green",
+      "Port ~20 small Node utilities to Python (string, array, object reshaping)",
+      "Write a typed module: a frozen <span class='mono'>Money</span> dataclass, an <span class='mono'>Enum</span>, a generator",
+      "Rewrite one data-transform using comprehensions + <span class='mono'>defaultdict</span> instead of loops",
+    ],
+    outcome:"Idiomatic, type-checked Python and a toolchain you run by reflex." },
+
+  { n:"WEEK 02", title:"The runtime & your first FastAPI service",
+    goal:"Stand up a validated, auto-documented FastAPI endpoint and know when async helps.",
+    read:[["Part 3","GIL / asyncio"],["Part 14","Async"],["Parts 6–7","FastAPI"]],
+    readTasks:[
+      "Read Part 3 (the GIL, asyncio vs threads vs processes) and Part 14 basics",
+      "Read Parts 6–7 (routing, FastAPI, Pydantic, dependencies)",
+    ],
+    build:[
+      "Build the Quick Start CRUD, then extend to a typed in-memory Tasks API",
+      "Add Pydantic <span class='mono'>*In</span>/<span class='mono'>*Out</span> models, a dependency, and exercise <span class='mono'>/docs</span>",
+      "Run the async experiment: sequential vs <span class='mono'>asyncio.gather</span> vs threads; note the GIL result",
+    ],
+    outcome:"A working, validated, self-documenting API — and a correct async mental model." },
+
+  { n:"WEEK 03", title:"Data layer: SQLAlchemy + a persisted API",
+    goal:"A real, persisted, paginated CRUD API with zero N+1 queries.",
+    read:[["Part 8","SQLAlchemy"],["Part 9","REST (FastAPI)"]],
+    readTasks:[
+      "Read Part 8 focusing on async SQLAlchemy 2.0 + Alembic migrations",
+      "Read Part 9 (the FastAPI REST side: pagination, filtering, errors)",
+    ],
+    build:[
+      "Model Users / Projects / Tasks in SQLAlchemy; wire an async session",
+      "Set up Alembic; migrate a real Postgres database",
+      "Move the Tasks API onto Postgres; add pagination, filtering, sorting",
+      "Create and then fix an N+1 with <span class='mono'>selectinload</span>; prove it with SQL logging",
+    ],
+    outcome:"A production-shaped persisted API you understand query-by-query." },
+
+  { n:"WEEK 04", title:"The second stack: Django + DRF",
+    goal:"Build the same API in Django/DRF and choose between the two stacks on purpose.",
+    read:[["Part 5","Django"],["Part 6","URLs"],["Parts 8–9","ORM + DRF"]],
+    readTasks:[
+      "Read Part 5 (project/apps/settings/admin) and Part 6 (Django URLs)",
+      "Read the Django ORM side of Part 8 and the DRF side of Part 9",
+    ],
+    build:[
+      "Rebuild Projects/Tasks in Django: models, migrations, the admin UI",
+      "Add DRF serializers, a <span class='mono'>ModelViewSet</span>, and a router",
+      "Write two paragraphs: when you'd pick Django vs FastAPI, and why",
+    ],
+    outcome:"Fluency in both ecosystems — and judgment about which fits a job." },
+
+  { n:"WEEK 05", title:"Auth, security & architecture",
+    goal:"An API safe to expose publicly, with clean, intentional layering.",
+    read:[["Part 10","Auth"],["Part 11","Security"],["Part 12","Architecture"]],
+    readTasks:[
+      "Read Part 10 (JWT, sessions, permissions) and Part 11 (the security checklist + SSRF)",
+      "Read Part 12 (services, use-cases, Protocols, when NOT to abstract)",
+    ],
+    build:[
+      "Add JWT auth: a FastAPI dependency and DRF <span class='mono'>simplejwt</span>",
+      "Enforce object-level permissions (owner-only edit → 403) and rate limiting",
+      "Refactor a fat endpoint into a use-case + a Protocol-injected gateway",
+      "Run the security checklist: parameterized queries, CORS, secrets, HMAC webhook verify",
+    ],
+    outcome:"A hardened, well-layered API you'd be comfortable putting on the internet." },
+
+  { n:"WEEK 06", title:"Async infrastructure: jobs, cache, HTTP, files",
+    goal:"Nothing slow or blocking runs on the request path.",
+    read:[["Part 13","Celery"],["Part 15","Cache"],["Part 16","httpx"],["Part 17","S3"]],
+    readTasks:[
+      "Read Part 13 (Celery, retries, idempotency) and Part 15 (cache + stampede)",
+      "Read Part 16 (httpx + retries) and Part 17 (uploads, S3, presigned URLs)",
+    ],
+    build:[
+      "Move email + an external sync into idempotent Celery tasks (Redis broker)",
+      "Cache a hot endpoint with a TTL and stampede protection; invalidate on write",
+      "Wrap a third-party API in an <span class='mono'>httpx</span> client with timeouts + retries",
+      "Add an S3 upload with a generated key and a 5-minute presigned download URL",
+    ],
+    outcome:"A responsive API that offloads work correctly and calls the outside world safely." },
+
+  { n:"WEEK 07", title:"Testing, production, performance & observability",
+    goal:"You can ship and operate the service with confidence.",
+    read:[["Part 18","pytest"],["Parts 20–22","Prod / Perf / Obs"],["Part 19","CLI"]],
+    readTasks:[
+      "Read Part 18 (pytest, fixtures, factories, respx) and Part 19 (CLIs)",
+      "Read Parts 20–22 (WSGI/ASGI, Docker, profiling, logging, tracing)",
+    ],
+    build:[
+      "Write a pytest suite with factories + dependency overrides; aim past 80% on the API",
+      "Dockerize the stack: web + Celery worker + beat + Postgres + Redis",
+      "Add structured JSON logging, <span class='mono'>/health</span> + <span class='mono'>/ready</span>, and Sentry",
+      "Profile a slow endpoint and cut its query count/time by ≥5×; add a query-count test",
+    ],
+    outcome:"A tested, containerized, observable service ready to deploy." },
+
+  { n:"WEEK 08", title:"Capstones & portfolio — job-ready",
+    goal:"Three production-grade projects, one deployed and documented publicly.",
+    read:[["Part 23","Capstones"],["Part 24","Cheat sheet"]],
+    readTasks:[
+      "Read Part 23 (all three capstone specs) and revisit the Part 24 cheat sheet",
+    ],
+    build:[
+      "Polish the Task Management API to portfolio quality (README + tests + docs)",
+      "Build the E-commerce API: idempotent checkout + pessimistic inventory locking",
+      "Build the Webhook Platform: HMAC signatures, dedupe, retries with backoff",
+      "Deploy one project publicly; write its README; push all three to GitHub",
+    ],
+    outcome:"A portfolio that proves you can build and run real Python backends — you're job-ready." },
+];
+
+const FINAL = [
+  "Build & deploy a FastAPI service from scratch",
+  "Build the same API in Django + DRF",
+  "Explain the GIL and choose async vs threads vs processes",
+  "Know when NOT to use async",
+  "Model data & migrations in SQLAlchemy and Django ORM",
+  "Find and kill N+1 queries",
+  "Implement JWT auth + object-level permissions",
+  "Run the security checklist from memory",
+  "Offload work to idempotent Celery tasks",
+  "Cache with TTL + stampede protection",
+  "Write a pytest suite with fixtures & factories",
+  "Dockerize web + worker + db + redis",
+  "Add logging, health checks & error tracking",
+  "Three backend projects live on GitHub",
+];
+
+const KEY = "pybackend-sprint-v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+const weeksEl = document.getElementById("weeks");
+
+function taskItem(id, html){
+  const checked = !!state[id];
+  return `<li class="task${checked?' checked':''}">
+    <input type="checkbox" id="${id}" ${checked?'checked':''}>
+    <label for="${id}">${html}</label></li>`;
+}
+
+WEEKS.forEach((w, wi) => {
+  const refs = w.read.map(r=>`<span class="ref">${r[0]}</span>`).join(' ');
+  let items = "";
+  items += `<div class="grp"><div class="label">Read${'  '}·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+
+  const det = document.createElement("details");
+  det.className = "week";
+  if (wi < 1) det.open = true;
+  det.innerHTML = `
+    <summary>
+      <span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog">
+        <div class="mini"><i data-wkfill="${wi}"></i></div>
+        <span class="count" data-wkcount="${wi}">0/0</span>
+      </div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+
+// final checklist
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+
+// wiring
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0;
+  boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length;
+  const pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`);
+    const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null;
+    if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+
+document.addEventListener("change", e=>{
+  if(e.target.matches('input[type=checkbox]')){
+    state[e.target.id] = e.target.checked;
+    e.target.closest(".task")?.classList.toggle("checked", e.target.checked);
+    save(); refresh();
+  }
+});
+
+document.getElementById("reset").addEventListener("click", ()=>{
+  if(!confirm("Reset all progress?")) return;
+  state = {}; save();
+  document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); });
+  refresh();
+});
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{
+  allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen);
+  e.target.textContent = allOpen? "Collapse all":"Expand all";
+});
+
+// theme toggle
+const root=document.documentElement;
+let theme=null; try{ theme=localStorage.getItem("pybackend-theme"); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{
+  const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+  const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next);
+  try{ localStorage.setItem("pybackend-theme", next); }catch(e){}
+});
+
+document.getElementById("stamp").textContent = "8 weeks · ~160 hrs";
+refresh();
+</script>

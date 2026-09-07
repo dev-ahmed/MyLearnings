@@ -1,0 +1,8 @@
+services:
+  ml-plan:
+    build: .
+    image: ml-plan:latest
+    container_name: ml-plan
+    ports:
+      - "8647:80"          # visit http://localhost:8647
+    restart: unless-stopped

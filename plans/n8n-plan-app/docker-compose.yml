@@ -1,0 +1,8 @@
+services:
+  n8n-plan:
+    build: .
+    image: n8n-plan:latest
+    container_name: n8n-plan
+    ports:
+      - "8649:80"          # visit http://localhost:8649
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+services:
+  rust-plan:
+    build: .
+    image: rust-plan:latest
+    container_name: rust-plan
+    ports:
+      - "8648:80"          # visit http://localhost:8648
+    restart: unless-stopped

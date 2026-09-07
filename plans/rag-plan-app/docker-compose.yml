@@ -1,0 +1,8 @@
+services:
+  rag-plan:
+    build: .
+    image: rag-plan:latest
+    container_name: rag-plan
+    ports:
+      - "8646:80"          # visit http://localhost:8646
+    restart: unless-stopped

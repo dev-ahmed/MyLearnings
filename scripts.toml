@@ -1,0 +1,13 @@
+[scripts]
+# Launcher scripts
+launcher = "python launcher.py"
+setup-aliases = "python setup-aliases.py"
+
+# Start/Stop scripts
+start-sh = "./start.sh"
+start = "python start.py"
+stop-sh = "./stop.sh"
+stop = "python stop.py"
+
+# HTML launcher
+plans-launcher = "open plans-launcher.html"

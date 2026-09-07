@@ -1,0 +1,370 @@
+<title>Backend Infra Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --bg:#f0eeec; --surface:#ffffff; --surface-2:#f7f4f2; --ink:#241a18;
+  --muted:#6b5f5c; --line:#e2dcd8; --line-strong:#cfc6c1;
+  --accent:#c0392b; --accent-ink:#ffffff; --accent-soft:#fbe7e3;
+  --done:#12925a; --done-soft:#e2f2e9; --accent2:#b7791f;
+  --shadow:0 1px 2px rgba(36,26,24,.06), 0 8px 24px rgba(36,26,24,.06);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#181211; --surface:#211917; --surface-2:#2a201d; --ink:#f1e9e6;
+    --muted:#a99c98; --line:#382c29; --line-strong:#493a36;
+    --accent:#f0674f; --accent-ink:#1a0f0c; --accent-soft:#3a1e19;
+    --done:#43c489; --done-soft:#123024; --accent2:#e0aa4a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181211; --surface:#211917; --surface-2:#2a201d; --ink:#f1e9e6;
+  --muted:#a99c98; --line:#382c29; --line-strong:#493a36;
+  --accent:#f0674f; --accent-ink:#1a0f0c; --accent-soft:#3a1e19;
+  --done:#43c489; --done-soft:#123024; --accent2:#e0aa4a;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+
+header.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--accent2); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem}
+.principle p b{font-weight:600}
+
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em; color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0; border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px; border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft); padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent); border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px}
+@media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+
+.cheat{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+.cheat .grp2{background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:13px 15px}
+.cheat h4{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--accent2); margin:0 0 8px}
+.cheat code{display:block; font-family:"IBM Plex Mono",monospace; font-size:.78rem; color:var(--ink);
+  padding:3px 0 3px 1.2em; text-indent:-1.2em; line-height:1.5; white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word}
+.cheat code .c{color:var(--muted)}
+
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block}
+.reslist .d{color:var(--muted); font-size:.82rem}
+
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span>Study Plan</span><span aria-hidden="true">·</span><span>Redis · Queues · Mail</span></div>
+    <h1>Backend Infra Sprint</h1>
+    <p class="lede">Three weeks to make the async backbone of a real backend second nature: cache and coordinate with Redis, run reliable background jobs, and test the email they send — one app carried through every week, tied to your three cookbooks.</p>
+    <div class="chips">
+      <span class="chip">Profile: <b>backend dev</b></span>
+      <span class="chip">Stack: <b>Node + Python</b></span>
+      <span class="chip">Pace: <b>~15 hrs / week</b></span>
+      <span class="chip">Length: <b>3 weeks</b></span>
+      <span class="chip">Est: <b>~45 hrs</b></span>
+    </div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles">
+    <div class="principle"><span class="n">01</span><p><b>One app, all 3 weeks.</b> Add caching, then jobs, then tested mail to a single API — each week is a layer on the same project, nothing throwaway.</p></div>
+    <div class="principle"><span class="n">02</span><p><b>Redis is the spine.</b> It's the cache, the lock, the rate limiter, and the queue broker. Get comfortable with it in week 1 and the rest builds on it.</p></div>
+    <div class="principle"><span class="n">03</span><p><b>Assume it runs twice.</b> Everything async can be redelivered — make every job and effect idempotent. It's the discipline that separates working from correct.</p></div>
+    <div class="principle"><span class="n">04</span><p><b>Both languages.</b> Do each build in your stronger stack first (Node), then port the core to Python (redis-py + Celery/RQ) to cement it.</p></div>
+    <div class="principle"><span class="n">05</span><p><b>Make it visible.</b> Stand up dashboards and Mailpit early — you can't operate what you can't see, and async has no request to watch.</p></div>
+    <div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~3 hrs/day × 5 days. End each day with something running you can hit — a cached endpoint, a drained queue, a captured email.</p></div>
+  </div>
+
+  <div class="sec-head"><h2>The three weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+
+  <div class="sec-head"><h2>Core commands</h2><div class="rule"></div></div>
+  <div class="panel">
+    <div class="cheat">
+      <div class="grp2"><h4>Redis</h4>
+        <code>redis-cli ping</code>
+        <code>SET k v EX 60 <span class="c"># value + TTL</span></code>
+        <code>SET lock:x tok NX PX 5000</code>
+        <code>ZADD due &lt;ts&gt; job <span class="c"># delayed</span></code>
+        <code>SCAN 0 MATCH c:* COUNT 100</code>
+        <code>INFO memory <span class="c"># watch this</span></code></div>
+      <div class="grp2"><h4>Queues</h4>
+        <code>node worker.js <span class="c"># BullMQ</span></code>
+        <code>celery -A app worker -c 8</code>
+        <code>celery -A app beat <span class="c"># scheduler</span></code>
+        <code>celery -A app flower <span class="c"># UI</span></code>
+        <code>rq worker email <span class="c"># RQ</span></code></div>
+      <div class="grp2"><h4>Mailpit</h4>
+        <code>docker run -p 1025:1025 -p 8025:8025 axllent/mailpit</code>
+        <code>GET  /api/v1/messages</code>
+        <code>GET  /api/v1/search?query=...</code>
+        <code>DELETE /api/v1/messages <span class="c"># reset</span></code></div>
+      <div class="grp2"><h4>Ports to remember</h4>
+        <code>6379 <span class="c"># Redis</span></code>
+        <code>1025 <span class="c"># Mailpit SMTP (in)</span></code>
+        <code>8025 <span class="c"># Mailpit UI + API</span></code>
+        <code>5555 <span class="c"># Flower</span></code></div>
+    </div>
+  </div>
+
+  <div class="sec-head"><h2>Infra-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">Tick every box and you can build and operate the caching, queueing, and email layer of a production backend.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+
+  <div class="sec-head"><h2>Your cookbooks & reference</h2><div class="rule"></div></div>
+  <div class="panel">
+    <ul class="reslist">
+      <li><span class="k">Redis Backend Cookbook</span><span class="d">Your week-1 companion (this set)</span></li>
+      <li><span class="k">Background Jobs &amp; Queues Cookbook</span><span class="d">Your week-2 companion (this set)</span></li>
+      <li><span class="k">Mailpit Cookbook</span><span class="d">Your week-3 companion (this set)</span></li>
+      <li><a class="k" href="https://redis.io/docs/latest/" target="_blank" rel="noopener">Redis docs</a><span class="d">Commands &amp; data types reference</span></li>
+      <li><a class="k" href="https://docs.bullmq.io/" target="_blank" rel="noopener">BullMQ docs</a><span class="d">Node queue library</span></li>
+      <li><a class="k" href="https://docs.celeryq.dev/" target="_blank" rel="noopener">Celery docs</a><span class="d">Python task queue</span></li>
+      <li><a class="k" href="https://mailpit.axllent.org/docs/" target="_blank" rel="noopener">Mailpit docs</a><span class="d">Config &amp; API reference</span></li>
+      <li><a class="k" href="https://python-rq.org/" target="_blank" rel="noopener">RQ docs</a><span class="d">Simple Python queue</span></li>
+    </ul>
+  </div>
+
+  <footer>Backend Infra Sprint · progress saved in this browser · <span id="stamp"></span></footer>
+</div>
+
+<script>
+const WEEKS = [
+  { n:"WEEK 01", title:"Redis foundations — cache, lock, limit",
+    goal:"Use Redis confidently for caching, coordination, and rate limiting.",
+    read:[["Redis Pt 1–7","Model → rate limiting"]],
+    readTasks:[
+      "Read Redis cookbook Parts 1–4 (model, setup, data types, TTL/eviction)",
+      "Read Redis cookbook Parts 5–7 (caching, locks, rate limiting)",
+    ],
+    build:[
+      "Run Redis in Docker; connect from Node (<span class='mono'>ioredis</span>) and Python (<span class='mono'>redis-py</span>)",
+      "Add cache-aside to a hot read: jittered TTL + delete-on-write invalidation",
+      "Add a recompute lock to the hottest key (stampede protection)",
+      "Build a safe distributed lock: <span class='mono'>SET NX PX</span> + token-checked release",
+      "Add a sliding-window rate limiter (sorted set) returning 429 + Retry-After",
+    ],
+    outcome:"Redis-backed caching, locking, and rate limiting in a real app." },
+
+  { n:"WEEK 02", title:"Background jobs & queues",
+    goal:"Move slow work off the request path, reliably — retries, DLQ, scheduling.",
+    read:[["Queues Pt 1–9","Jobs → scaling"],["Redis Pt 8–9","Streams / Lua"]],
+    readTasks:[
+      "Read Queues cookbook Parts 1–6 (why, landscape, first job, options, idempotency, retries/DLQ)",
+      "Read Queues Parts 7–9 (flows, scheduling, concurrency) + Redis Parts 8–9 (streams, Lua)",
+    ],
+    build:[
+      "Set up BullMQ (Node) or Celery/RQ (Python) with a worker in its own process",
+      "Move email + an external sync to jobs; make each one <b>idempotent</b>",
+      "Add capped attempts + exponential backoff with jitter; fail fast on permanent errors",
+      "Route exhausted jobs to a dead-letter queue; add a replay script",
+      "Split queues by urgency; rate-limit a job that calls an external API",
+      "Add one repeatable/scheduled job (Beat or BullMQ repeat) — one scheduler only",
+    ],
+    outcome:"A reliable async job system with retries, DLQ, and scheduling." },
+
+  { n:"WEEK 03", title:"Email testing & the integration capstone",
+    goal:"Test the mail your jobs send, then wire cache + queue + mail into one tested backbone.",
+    read:[["Mailpit","all"],["Queues Pt 10–12","Monitoring → capstone"],["Redis Pt 10–11","Persistence / prod"]],
+    readTasks:[
+      "Read the Mailpit cookbook end to end",
+      "Read Queues Parts 10–12 (monitoring, production, capstone) + Redis Parts 10–11 (persistence, production)",
+    ],
+    build:[
+      "Add Mailpit to docker-compose; point your mailer at it via env vars",
+      "Use the HTML check + <b>Chaos</b> to test a template and SMTP-failure handling",
+      "Write end-to-end email tests via the Mailpit API (clear → act → poll → assert) in CI",
+      "Capstone: order-paid → enqueue idempotent receipt email + signed webhook (retries + DLQ), emails captured &amp; asserted",
+      "Add a dashboard (Bull Board / Flower) + queue-depth &amp; DLQ alerts; put it behind auth",
+      "Production pass: queue Redis with persistence <b>on</b> and eviction <b>off</b>; workers restart on deploy; graceful shutdown",
+    ],
+    outcome:"A production-shaped async backbone — cache, queue, mail — tested end to end." },
+];
+
+const FINAL = [
+  "Cache-aside with invalidation + stampede protection",
+  "Safe distributed lock (token-checked release)",
+  "Sliding-window rate limiter (429 + Retry-After)",
+  "Pick the right Redis data type per problem",
+  "Set Redis persistence & eviction per use case",
+  "Offload work to idempotent background jobs",
+  "Retries + backoff + DLQ; transient vs permanent",
+  "Split queues by urgency; rate-limit external calls",
+  "Schedule repeatable jobs (one scheduler)",
+  "Wire an app's mail to Mailpit via env",
+  "End-to-end email tests (clear→act→poll→assert) in CI",
+  "Monitor queue depth + DLQ; secure dashboards",
+  "Deploy: restart workers + graceful shutdown",
+  "Queue Redis: eviction OFF, persistence ON",
+];
+
+const KEY = "infra-sprint-v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+const weeksEl = document.getElementById("weeks");
+function taskItem(id, html){
+  const checked = !!state[id];
+  return `<li class="task${checked?' checked':''}"><input type="checkbox" id="${id}" ${checked?'checked':''}><label for="${id}">${html}</label></li>`;
+}
+WEEKS.forEach((w, wi) => {
+  let items = "";
+  items += `<div class="grp"><div class="label">Learn  ·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+  const det = document.createElement("details");
+  det.className = "week";
+  if (wi < 1) det.open = true;
+  det.innerHTML = `
+    <summary>
+      <span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog"><div class="mini"><i data-wkfill="${wi}"></i></div><span class="count" data-wkcount="${wi}">0/0</span></div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0; boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length, pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`);
+    const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null;
+    if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+document.addEventListener("change", e=>{
+  if(e.target.matches('input[type=checkbox]')){
+    state[e.target.id] = e.target.checked;
+    e.target.closest(".task")?.classList.toggle("checked", e.target.checked);
+    save(); refresh();
+  }
+});
+document.getElementById("reset").addEventListener("click", ()=>{
+  if(!confirm("Reset all progress?")) return;
+  state = {}; save();
+  document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); });
+  refresh();
+});
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{
+  allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen);
+  e.target.textContent = allOpen? "Collapse all":"Expand all";
+});
+const root=document.documentElement;
+let theme=null; try{ theme=localStorage.getItem("infra-theme"); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{
+  const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+  const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next);
+  try{ localStorage.setItem("infra-theme", next); }catch(e){}
+});
+document.getElementById("stamp").textContent = "3 weeks · ~45 hrs";
+refresh();
+</script>

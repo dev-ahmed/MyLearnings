@@ -1,0 +1,183 @@
+<title>Laravel Backend Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#14202f;
+  --muted:#56637a; --line:#d8dee8; --line-strong:#c2cbd8;
+  --accent:#6d28d9; --accent-ink:#ffffff; --accent-soft:#efe8fd;
+  --done:#12925a; --done-soft:#e2f2e9; --accent2:#db2777;
+  --shadow:0 1px 2px rgba(20,24,32,.06), 0 8px 24px rgba(20,24,32,.06); --radius:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1622; --surface:#17212f; --surface-2:#1b2736; --ink:#eaf0f8;
+  --muted:#93a1b5; --line:#26303f; --line-strong:#34435a;
+  --accent:#a78bfa; --accent-ink:#1a1033; --accent-soft:#241a45;
+  --done:#43c489; --done-soft:#123024; --accent2:#f472b6;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --surface:#17212f; --surface-2:#1b2736; --ink:#eaf0f8;
+  --muted:#93a1b5; --line:#26303f; --line-strong:#34435a;
+  --accent:#a78bfa; --accent-ink:#1a1033; --accent-soft:#241a45;
+  --done:#43c489; --done-soft:#123024; --accent2:#f472b6;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+header.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--accent2); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem} .principle p b{font-weight:600}
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em; color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0; border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px; border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft); padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent); border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px} @media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block} .reslist .d{color:var(--muted); font-size:.82rem}
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span>Study Plan</span> · <span>Node.js → PHP → Laravel</span></div>
+    <h1>Laravel Backend Sprint</h1>
+    <p class="lede">Six weeks to turn your Node.js experience into production PHP and Laravel — one API grown through every week, mapped chapter-by-chapter to your PHP &amp; Laravel cookbook.</p>
+    <div class="chips"><span class="chip">Profile: <b>Node.js dev</b></span><span class="chip">Target: <b>Laravel APIs</b></span><span class="chip">Pace: <b>~20 hrs / week</b></span><span class="chip">Length: <b>6 weeks</b></span><span class="chip">Est: <b>~120 hrs</b></span></div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles"><div class="principle"><span class="n">01</span><p><b>One app, six weeks.</b> Grow a single Projects/Tasks API — language, then framework, then production — so nothing is throwaway.</p></div><div class="principle"><span class="n">02</span><p><b>Map every concept to Node.</b> For each topic ask: what do I do in Express/Prisma, how is it done here, why is it different? The cookbook answers all three.</p></div><div class="principle"><span class="n">03</span><p><b>Types on from day one.</b> <span class='mono'>declare(strict_types=1)</span> + Larastan — the TypeScript rigor you already have, in PHP.</p></div><div class="principle"><span class="n">04</span><p><b>Lean on conventions.</b> Laravel does a lot for you (route model binding, Form Requests, Eloquent). Learn the drawers, don't fight them.</p></div><div class="principle"><span class="n">05</span><p><b>Thin controllers.</b> Validation in Form Requests, authorization in Policies, shape in Resources, logic in Actions when it grows.</p></div><div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~4 hrs/day × 5 days. End each day with a route you can hit or a test that passes.</p></div></div>
+  <div class="sec-head"><h2>The six weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+  <div class="sec-head"><h2>Job-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">Tick every box and you can build, secure, and deploy production Laravel APIs.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+  <div class="sec-head"><h2>Reference &amp; your cookbooks</h2><div class="rule"></div></div>
+  <div class="panel"><ul class="reslist"><li><span class="k">PHP &amp; Laravel Backend Cookbook</span><span class="d">Your companion for every week (this set)</span></li><li><a class="k" href="https://laravel.com/docs" target="_blank" rel="noopener">Laravel documentation</a><span class="d">Deep, well-written framework reference</span></li><li><a class="k" href="https://bootcamp.laravel.com/" target="_blank" rel="noopener">Laravel Bootcamp</a><span class="d">Official hands-on build</span></li><li><a class="k" href="https://laravel.com/docs/eloquent-relationships" target="_blank" rel="noopener">Eloquent relationships</a><span class="d">The ORM in depth</span></li><li><a class="k" href="https://pestphp.com/" target="_blank" rel="noopener">Pest</a><span class="d">The testing framework</span></li><li><a class="k" href="https://laravel.com/docs/sanctum" target="_blank" rel="noopener">Laravel Sanctum</a><span class="d">API token auth</span></li><li><a class="k" href="https://laravel.com/docs/horizon" target="_blank" rel="noopener">Laravel Horizon</a><span class="d">Queue dashboard &amp; workers</span></li><li><a class="k" href="https://getcomposer.org/doc/" target="_blank" rel="noopener">Composer</a><span class="d">Dependency management</span></li></ul></div>
+  <footer>Laravel Backend Sprint · progress saved in this browser · 6 weeks · ~120 hrs</footer>
+</div>
+<script>
+const WEEKS = [{"n": "WEEK 01", "title": "The PHP language & functional PHP", "goal": "Read and write modern, typed PHP without translating in your head.", "read": [["Parts 1–2", "Language / functional"]], "readTasks": ["Read Part 1 (syntax, types, arrays, classes, enums, traits, generics)", "Read Part 2 (functional PHP + Laravel Collections)"], "build": ["Set up PHP 8.3 + Composer; run <span class='mono'>declare(strict_types=1)</span> + Larastan green", "Port ~15 Node utilities to PHP; note array-is-both-list-and-map", "Rewrite a data transform with <span class='mono'>collect()->map()->filter()->reduce()</span>", "Model a <span class='mono'>Money</span> value object + a backed enum"], "outcome": "Idiomatic, type-checked PHP and fluent Collection pipelines."}, {"n": "WEEK 02", "title": "Runtime, Composer & Laravel architecture", "goal": "Understand the shared-nothing runtime and how Laravel is wired.", "read": [["Parts 3–5", "Runtime / Composer / architecture"]], "readTasks": ["Read Part 3 (Node event loop vs PHP-FPM/Octane) and Part 4 (Composer)", "Read Part 5 (container, providers, facades, middleware)"], "build": ["Scaffold a Laravel app; wire a route → controller → middleware", "Bind a contract to an implementation in a service provider; inject by type-hint", "Explain shared-nothing vs the Node event loop in two sentences", "Add a timing middleware and confirm it runs on the way out"], "outcome": "A routed app with DI, and a correct model of where work runs."}, {"n": "WEEK 03", "title": "Routing, Eloquent & CRUD", "goal": "Build a full relational CRUD feature with zero N+1s.", "read": [["Parts 6–8", "Routing / Eloquent / CRUD"]], "readTasks": ["Read Part 6 (routing, route model binding, apiResource) and Part 7 (Eloquent vs Prisma)", "Read Part 8 (the anatomy of a CRUD feature)"], "build": ["Model Users → Projects → Tasks with migrations, relations, casts, factories", "Build the full CRUD: Form Request, Resource, --api controller", "Eager-load to kill an N+1; prove it with the query count", "Turn on <span class='mono'>preventLazyLoading</span> in dev"], "outcome": "A relational data layer and clean CRUD with no N+1 queries."}, {"n": "WEEK 04", "title": "REST APIs, auth & security", "goal": "An API safe to expose publicly.", "read": [["Parts 9–11", "REST / auth / security"]], "readTasks": ["Read Part 9 (pagination, filtering, error envelopes, idempotency) and Part 10 (Sanctum, policies)", "Read Part 11 (the security checklist)"], "build": ["Add pagination, allow-listed filtering/sorting, a central JSON error handler", "Add Sanctum tokens + a ProjectPolicy (owner-only edit → 403)", "Add rate limiting; confirm mass-assignment and injection are closed", "Add an idempotency key to an unsafe POST"], "outcome": "A production-shaped, authenticated, hardened JSON API."}, {"n": "WEEK 05", "title": "Architecture, queues, cache, HTTP, files, testing", "goal": "Offload slow work and cover the app with tests.", "read": [["Parts 12–18", "Architecture → testing"]], "readTasks": ["Read Parts 12–15 (architecture, queues, scheduling, cache)", "Read Parts 16–18 (HTTP client, files/S3, Pest testing)"], "build": ["Move email + an external sync to idempotent queued jobs (Redis)", "Cache a hot endpoint with stampede protection; add a scheduled command", "Wrap a third-party API in the HTTP client with timeouts + retries; S3 upload + signed URL", "Cover the API with Pest feature tests + factories; fake the queue"], "outcome": "Responsive endpoints, offloaded work, and a fast test suite."}, {"n": "WEEK 06", "title": "Artisan, deployment, advanced & capstone", "goal": "Ship it, and build the capstones.", "read": [["Parts 19–22", "Artisan → capstone"]], "readTasks": ["Read Part 19 (Artisan) and Part 20 (Nginx + FPM + Supervisor + Horizon + deploy)", "Read Part 21 (advanced) and Part 22 (capstones)"], "build": ["Write a custom Artisan command; containerize web + worker + scheduler + Postgres + Redis", "Practice an expand→contract migration with <span class='mono'>queue:restart</span>", "Build Capstone A (Task API), then start B (E-commerce, idempotent checkout + locking)", "Deploy one publicly with Horizon; write the README"], "outcome": "A deployable Laravel backend and portfolio-grade capstones."}];
+const FINAL = ["Write modern typed PHP fluently", "Explain shared-nothing vs the Node event loop", "Wire routes, controllers, middleware, DI", "Model data & relations in Eloquent, no N+1", "Build CRUD: Form Request + Resource + Policy", "Pagination, filtering, consistent error envelopes", "Sanctum auth + object-level policies", "Run the security checklist from memory", "Offload work to idempotent queued jobs", "Cache with stampede protection; schedule tasks", "Feature-test the API with Pest + factories", "Deploy Nginx + FPM + Supervisor + Horizon", "Expand→contract migrations with queue:restart", "Two+ capstone projects on GitHub"];
+const KEY = "laravel-sprint-v1"; const THEME_KEY = "laravel-theme";
+let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const weeksEl = document.getElementById("weeks");
+function taskItem(id, html){ const c = !!state[id];
+  return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
+WEEKS.forEach((w, wi) => {
+  let items = "";
+  items += `<div class="grp"><div class="label">Learn  ·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div><div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div><div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+  const det = document.createElement("details"); det.className = "week"; if (wi < 1) det.open = true;
+  det.innerHTML = `<summary><span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog"><div class="mini"><i data-wkfill="${wi}"></i></div><span class="count" data-wkcount="${wi}">0/0</span></div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary><div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0; boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length, pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`); const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null; if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
+  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
+const root=document.documentElement; let theme=null; try{ theme=localStorage.getItem(THEME_KEY); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{ const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches; const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
+document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
+refresh();
+</script>

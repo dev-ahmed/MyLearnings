@@ -1,0 +1,8 @@
+services:
+  laravel-plan:
+    build: .
+    image: laravel-plan:latest
+    container_name: laravel-plan
+    ports:
+      - "8645:80"          # visit http://localhost:8645
+    restart: unless-stopped

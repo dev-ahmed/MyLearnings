@@ -1,0 +1,8 @@
+services:
+  python-plan:
+    build: .
+    image: python-plan:latest
+    container_name: python-plan
+    ports:
+      - "8642:80"          # visit http://localhost:8642  (change the left number to use another port)
+    restart: unless-stopped

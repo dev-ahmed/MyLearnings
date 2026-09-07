@@ -1,0 +1,370 @@
+<title>Docker Deploy Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --bg:#eceff4; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#132030;
+  --muted:#54627a; --line:#d6dde8; --line-strong:#c0cad8;
+  --accent:#0b63c4; --accent-ink:#ffffff; --accent-soft:#e1edfb;
+  --done:#12925a; --done-soft:#e2f2e9; --teal:#0e7c86;
+  --shadow:0 1px 2px rgba(19,32,48,.06), 0 8px 24px rgba(19,32,48,.06);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c141f; --surface:#141f2d; --surface-2:#1a2635; --ink:#e8eff7;
+    --muted:#93a3b8; --line:#263344; --line-strong:#33455c;
+    --accent:#4aa3f0; --accent-ink:#06121f; --accent-soft:#122942;
+    --done:#43c489; --done-soft:#123024; --teal:#3cbac4;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c141f; --surface:#141f2d; --surface-2:#1a2635; --ink:#e8eff7;
+  --muted:#93a3b8; --line:#263344; --line-strong:#33455c;
+  --accent:#4aa3f0; --accent-ink:#06121f; --accent-soft:#122942;
+  --done:#43c489; --done-soft:#123024; --teal:#3cbac4;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+
+header.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,var(--accent),var(--teal))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--teal)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--teal); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem}
+.principle p b{font-weight:600}
+
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em; color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0; border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px; border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft); padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent); border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px}
+@media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+
+/* command cheat panel */
+.cheat{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+.cheat .grp2{background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:13px 15px}
+.cheat h4{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); margin:0 0 8px}
+.cheat code{display:block; font-family:"IBM Plex Mono",monospace; font-size:.78rem; color:var(--ink);
+  padding:3px 0 3px 1.2em; text-indent:-1.2em; line-height:1.5;
+  white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word}
+.cheat code .c{color:var(--muted)}
+
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block}
+.reslist .d{color:var(--muted); font-size:.82rem}
+
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span>Study Plan</span><span aria-hidden="true">·</span><span>Ship it with Docker</span></div>
+    <h1>Docker Deploy Sprint</h1>
+    <p class="lede">A three-week, build-first path from "docker run" to shipping a secure, optimized image through CI onto a real server. Aimed at a backend developer — containerize the very apps you're building, one working stack carried through every week.</p>
+    <div class="chips">
+      <span class="chip">Profile: <b>backend dev</b></span>
+      <span class="chip">Target: <b>ship containers</b></span>
+      <span class="chip">Pace: <b>~15 hrs / week</b></span>
+      <span class="chip">Length: <b>3 weeks</b></span>
+      <span class="chip">Est: <b>~45 hrs</b></span>
+    </div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles">
+    <div class="principle"><span class="n">01</span><p><b>Containerize your own apps.</b> Don't practice on toy images — dockerize the FastAPI/Node projects you're already building. Real problems teach faster.</p></div>
+    <div class="principle"><span class="n">02</span><p><b>Build small, build often.</b> Smaller images deploy faster and expose less. Watch your image size shrink week over week.</p></div>
+    <div class="principle"><span class="n">03</span><p><b>One process per container.</b> A container runs one job; compose the rest. State lives in volumes and databases, never the container.</p></div>
+    <div class="principle"><span class="n">04</span><p><b>Never bake secrets in.</b> Pass config and secrets at runtime, pin base-image versions, and keep a lean <span class="mono">.dockerignore</span>.</p></div>
+    <div class="principle"><span class="n">05</span><p><b>Read the layers.</b> Every Dockerfile line is a cached layer — order them cheap-to-expensive so rebuilds stay fast.</p></div>
+    <div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~3 hrs/day × 5 days. End each day with a container you can actually run and hit from your browser.</p></div>
+  </div>
+
+  <div class="sec-head"><h2>The three weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+
+  <div class="sec-head"><h2>Core commands to memorize</h2><div class="rule"></div></div>
+  <div class="panel">
+    <div class="cheat">
+      <div class="grp2"><h4>Images</h4>
+        <code>docker build -t app:1.0 .</code>
+        <code>docker images</code>
+        <code>docker tag app:1.0 user/app:1.0</code>
+        <code>docker push user/app:1.0</code>
+        <code>docker pull user/app:1.0</code></div>
+      <div class="grp2"><h4>Run &amp; inspect</h4>
+        <code>docker run -d -p 8080:80 app</code>
+        <code>docker ps <span class="c">/</span> docker ps -a</code>
+        <code>docker logs -f &lt;container&gt;</code>
+        <code>docker exec -it &lt;container&gt; sh</code>
+        <code>docker stop &lt;c&gt; <span class="c">/</span> docker rm &lt;c&gt;</code></div>
+      <div class="grp2"><h4>Compose</h4>
+        <code>docker compose up -d --build</code>
+        <code>docker compose ps</code>
+        <code>docker compose logs -f</code>
+        <code>docker compose down <span class="c"># -v wipes volumes</span></code></div>
+      <div class="grp2"><h4>Cleanup &amp; disk</h4>
+        <code>docker system df</code>
+        <code>docker image prune</code>
+        <code>docker volume ls</code>
+        <code>docker system prune -af</code></div>
+    </div>
+  </div>
+
+  <div class="sec-head"><h2>Ship-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">Tick every box and you can containerize, secure, and deploy real backend services — the Docker fluency a backend/DevOps role expects.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+
+  <div class="sec-head"><h2>Reference</h2><div class="rule"></div></div>
+  <div class="panel">
+    <ul class="reslist">
+      <li><a class="k" href="https://docs.docker.com/get-started/" target="_blank" rel="noopener">Docker: Get Started</a><span class="d">The official hands-on intro</span></li>
+      <li><a class="k" href="https://docs.docker.com/build/building/best-practices/" target="_blank" rel="noopener">Dockerfile best practices</a><span class="d">Layers, caching, slim images</span></li>
+      <li><a class="k" href="https://docs.docker.com/compose/" target="_blank" rel="noopener">Compose docs</a><span class="d">Multi-service stacks</span></li>
+      <li><a class="k" href="https://labs.play-with-docker.com/" target="_blank" rel="noopener">Play with Docker</a><span class="d">Free in-browser sandbox</span></li>
+      <li><a class="k" href="https://docs.docker.com/scout/" target="_blank" rel="noopener">Docker Scout</a><span class="d">Image vulnerability scanning</span></li>
+      <li><a class="k" href="https://github.com/docker/build-push-action" target="_blank" rel="noopener">build-push-action</a><span class="d">Build &amp; push in GitHub Actions</span></li>
+      <li><a class="k" href="https://docker-curriculum.com/" target="_blank" rel="noopener">Docker Curriculum</a><span class="d">Popular free deep-dive</span></li>
+      <li><a class="k" href="https://caddyserver.com/docs/" target="_blank" rel="noopener">Caddy</a><span class="d">Reverse proxy + automatic HTTPS</span></li>
+    </ul>
+  </div>
+
+  <footer>Docker Deploy Sprint · progress saved in this browser · <span id="stamp"></span></footer>
+</div>
+
+<script>
+const WEEKS = [
+  { n:"WEEK 01", title:"Images & containers — the fundamentals",
+    goal:"Containerize and run any single app, and understand what's actually happening.",
+    read:[["Model","Images vs containers"],["CLI","Lifecycle commands"]],
+    readTasks:[
+      "Learn the model: images vs containers, the daemon/CLI, registries, and layers",
+      "Learn the lifecycle commands: <span class='mono'>run</span>, <span class='mono'>ps</span>, <span class='mono'>exec</span>, <span class='mono'>logs</span>, <span class='mono'>stop</span>, <span class='mono'>rm</span>, <span class='mono'>images</span>, <span class='mono'>pull</span>",
+    ],
+    build:[
+      "Run official images (<span class='mono'>nginx</span>, <span class='mono'>postgres</span>, <span class='mono'>python</span>) and poke them with <span class='mono'>exec</span> + <span class='mono'>logs</span>",
+      "Write your first Dockerfile for a small Node app; <span class='mono'>build</span>, tag, and run it",
+      "Do the same for a Python/FastAPI app; add a lean <span class='mono'>.dockerignore</span>",
+      "Use a bind mount for live-reload dev, and a named volume to persist data",
+      "Publish a port and hit the container from your browser",
+    ],
+    outcome:"You can containerize and run any single service from scratch." },
+
+  { n:"WEEK 02", title:"Compose & real multi-service stacks",
+    goal:"Bring up a full backend stack (API + Postgres + Redis + worker) with one command.",
+    read:[["Compose","Services & networks"],["Config","Env & override files"]],
+    readTasks:[
+      "Learn Compose: services, networks, named volumes, <span class='mono'>depends_on</span>, healthchecks",
+      "Learn env/config &amp; secrets, and dev-vs-prod via <span class='mono'>compose.override.yml</span>",
+    ],
+    build:[
+      "Compose a stack: FastAPI + Postgres + Redis (your Python-plan app)",
+      "Persist Postgres with a named volume; connect services by name over a network",
+      "Add a Celery worker + beat as extra services",
+      "Add healthchecks, <span class='mono'>restart</span> policies, and a dev override with hot reload",
+      "Write a multi-stage Dockerfile that outputs a slim production image",
+    ],
+    outcome:"docker compose up brings up your whole backend, reproducibly." },
+
+  { n:"WEEK 03", title:"Production, security & shipping",
+    goal:"A small, secure, scanned image pushed to a registry and deployed behind HTTPS via CI.",
+    read:[["Optimize","Multi-stage & slim"],["Secure","Non-root, secrets, scan"]],
+    readTasks:[
+      "Learn image optimization: multi-stage builds, slim/distroless bases, layer ordering, caching",
+      "Learn container security: non-root user, least privilege, secrets, scanning — and when to reach for Kubernetes",
+    ],
+    build:[
+      "Shrink your image (multi-stage + slim base); measure the before/after size",
+      "Run as a non-root user; scan with <span class='mono'>docker scout</span> / <span class='mono'>trivy</span> and fix findings",
+      "Set resource limits, a real healthcheck, logging, and a restart policy",
+      "Push to Docker Hub or GHCR; pull &amp; run it on a server or VM",
+      "Add a GitHub Actions workflow that builds + pushes on every commit",
+      "Put it behind Caddy or Traefik with automatic HTTPS",
+    ],
+    outcome:"A production-grade image in a registry, deployed by CI behind HTTPS." },
+];
+
+const FINAL = [
+  "Write a clean Dockerfile from scratch",
+  "Explain images vs containers vs layers",
+  "Use bind mounts & named volumes correctly",
+  "Network multiple containers together",
+  "Orchestrate a stack with Compose",
+  "Use multi-stage builds for slim images",
+  "Run containers as a non-root user",
+  "Scan images for vulnerabilities",
+  "Handle secrets & env config safely",
+  "Push & pull from a registry (Hub/GHCR)",
+  "Build & push images in CI (Actions)",
+  "Deploy behind a reverse proxy with HTTPS",
+  "Prune images/volumes & manage disk",
+  "Know when to move from Compose to Kubernetes",
+];
+
+const KEY = "docker-sprint-v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+const weeksEl = document.getElementById("weeks");
+function taskItem(id, html){
+  const checked = !!state[id];
+  return `<li class="task${checked?' checked':''}"><input type="checkbox" id="${id}" ${checked?'checked':''}><label for="${id}">${html}</label></li>`;
+}
+WEEKS.forEach((w, wi) => {
+  let items = "";
+  items += `<div class="grp"><div class="label">Learn  ·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div>`;
+  items += `<div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+  const det = document.createElement("details");
+  det.className = "week";
+  if (wi < 1) det.open = true;
+  det.innerHTML = `
+    <summary>
+      <span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog"><div class="mini"><i data-wkfill="${wi}"></i></div><span class="count" data-wkcount="${wi}">0/0</span></div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary>
+    <div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0; boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length, pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`);
+    const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null;
+    if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+document.addEventListener("change", e=>{
+  if(e.target.matches('input[type=checkbox]')){
+    state[e.target.id] = e.target.checked;
+    e.target.closest(".task")?.classList.toggle("checked", e.target.checked);
+    save(); refresh();
+  }
+});
+document.getElementById("reset").addEventListener("click", ()=>{
+  if(!confirm("Reset all progress?")) return;
+  state = {}; save();
+  document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); });
+  refresh();
+});
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{
+  allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen);
+  e.target.textContent = allOpen? "Collapse all":"Expand all";
+});
+const root=document.documentElement;
+let theme=null; try{ theme=localStorage.getItem("docker-theme"); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{
+  const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches;
+  const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next);
+  try{ localStorage.setItem("docker-theme", next); }catch(e){}
+});
+document.getElementById("stamp").textContent = "3 weeks · ~45 hrs";
+refresh();
+</script>
