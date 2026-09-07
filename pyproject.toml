@@ -1,0 +1,15 @@
+[project]
+name = "mylearnings"
+version = "0.1.0"
+description = "Learning materials and scripts"
+requires-python = ">=3.10"
+
+[tool.taskipy.tasks]
+launcher = "python launcher.py"
+setup-aliases = "python setup-aliases.py"
+start-sh = "./start.sh"
+start = "python start.py"
+stop-sh = "./stop.sh"
+stop = "python stop.py"
+plans-launcher = "open plans-launcher.html"
+run-script = "python run_script.py"
