@@ -1,0 +1,18 @@
+services:
+  mylearnings-hub:
+    build:
+      context: ..
+      dockerfile: mylearnings-hub/Dockerfile
+    image: mylearnings-hub:latest
+    container_name: mylearnings-hub
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../cookbooks:/app/cookbooks:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

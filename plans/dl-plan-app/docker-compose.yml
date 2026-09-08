@@ -1,0 +1,8 @@
+services:
+  dl-plan:
+    build: .
+    image: dl-plan:latest
+    container_name: dl-plan
+    ports:
+      - "8652:80"          # visit http://localhost:8652
+    restart: unless-stopped

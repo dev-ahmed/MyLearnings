@@ -48,3 +48,27 @@ services:
     container_name: n8n-plan
     ports: ["8649:80"]
     restart: unless-stopped
+  rl-plan:
+    build: ./rl-plan-app
+    image: rl-plan:latest
+    container_name: rl-plan
+    ports: ["8650:80"]
+    restart: unless-stopped
+  da-plan:
+    build: ./da-plan-app
+    image: da-plan:latest
+    container_name: da-plan
+    ports: ["8651:80"]
+    restart: unless-stopped
+  dl-plan:
+    build: ./dl-plan-app
+    image: dl-plan:latest
+    container_name: dl-plan
+    ports: ["8652:80"]
+    restart: unless-stopped
+  agents-plan:
+    build: ./agents-plan-app
+    image: agents-plan:latest
+    container_name: agents-plan
+    ports: ["8653:80"]
+    restart: unless-stopped

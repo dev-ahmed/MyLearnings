@@ -1,0 +1,8 @@
+services:
+  da-plan:
+    build: .
+    image: da-plan:latest
+    container_name: da-plan
+    ports:
+      - "8651:80"          # visit http://localhost:8651
+    restart: unless-stopped

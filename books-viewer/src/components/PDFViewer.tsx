@@ -16,7 +16,7 @@ const PDFViewer = ({ url }: PDFViewerProps) => {
 
   useEffect(() => {
     const loadPdf = async () => {
-      const loadingTask = pdfjsLib.getDocument(url);
+      const loadingTask = pdfjsLib.getDocument({ url });
       const pdfDoc = await loadingTask.promise;
       setPdf(pdfDoc);
       setNumPages(pdfDoc.numPages);
@@ -46,33 +46,33 @@ const PDFViewer = ({ url }: PDFViewerProps) => {
   }, [pdf, pageNum, scale]);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="bg-gray-800 p-4 mb-4 rounded-lg flex gap-4 items-center">
+    <div className="h-full flex flex-col">
+      <div className="bg-gray-800 px-6 py-3 flex gap-4 items-center justify-center border-b border-gray-700">
         <button
           onClick={() => setPageNum(p => Math.max(1, p - 1))}
           disabled={pageNum <= 1}
-          className="px-4 py-2 bg-blue-600 rounded disabled:bg-gray-600"
+          className="px-6 py-2 bg-blue-600 rounded-lg disabled:bg-gray-600 disabled:opacity-50 hover:bg-blue-700 transition-colors font-medium"
         >
-          Previous
+          ← Previous
         </button>
-        <span>
+        <span className="px-4 py-2 bg-gray-700 rounded-lg font-medium min-w-[150px] text-center">
           Page {pageNum} of {numPages}
         </span>
         <button
           onClick={() => setPageNum(p => Math.min(numPages, p + 1))}
           disabled={pageNum >= numPages}
-          className="px-4 py-2 bg-blue-600 rounded disabled:bg-gray-600"
+          className="px-6 py-2 bg-blue-600 rounded-lg disabled:bg-gray-600 disabled:opacity-50 hover:bg-blue-700 transition-colors font-medium"
         >
-          Next
+          Next →
         </button>
-        <div className="ml-4 flex gap-2">
-          <button onClick={() => setScale(s => s - 0.25)} className="px-3 py-2 bg-gray-700 rounded">-</button>
-          <span className="px-3 py-2">{Math.round(scale * 100)}%</span>
-          <button onClick={() => setScale(s => s + 0.25)} className="px-3 py-2 bg-gray-700 rounded">+</button>
+        <div className="ml-8 flex gap-3 items-center">
+          <button onClick={() => setScale(s => Math.max(0.5, s - 0.25))} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-colors">−</button>
+          <span className="px-4 py-2 bg-gray-700 rounded-lg font-medium min-w-[80px] text-center">{Math.round(scale * 100)}%</span>
+          <button onClick={() => setScale(s => Math.min(3, s + 0.25))} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-bold transition-colors">+</button>
         </div>
       </div>
-      <div className="overflow-auto max-h-[calc(100vh-200px)]">
-        <canvas ref={canvasRef} className="border border-gray-700" />
+      <div className="flex-1 overflow-auto bg-gray-800 flex items-center justify-center p-4">
+        <canvas ref={canvasRef} className="shadow-2xl" />
       </div>
     </div>
   );

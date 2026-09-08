@@ -1,9 +1,11 @@
 # MyLearnings
 
-Your backend-engineering learning library — eight cookbooks (PDF + EPUB), seven
-interactive study plans (as self-hosted Docker apps), and a tunnel tool to reach
-them from your phone. Framed for a developer fluent in Node.js/TypeScript moving
-into Python, PHP/Laravel, Rust, backend infrastructure, and ML.
+Your backend-engineering learning library — thirteen cookbooks (PDF + EPUB),
+twelve interactive study plans (as self-hosted Docker apps), a QR launcher, and a
+tunnel tool to reach them from your phone. Framed for a developer fluent in
+Node.js/TypeScript moving into Python, PHP/Laravel, Rust, backend infrastructure,
+and the full AI/ML stack — data analysis, machine learning, deep learning,
+reinforcement learning, RAG, and agents.
 
 ```
 MyLearnings/
@@ -17,9 +19,14 @@ MyLearnings/
 │   │   ├── queues/                  Background Jobs & Queues Cookbook
 │   │   ├── mailpit/                 Mailpit Cookbook
 │   │   └── n8n/                     n8n Automation Cookbook
-│   └── ai-and-ml/
-│       ├── rag/                     RAG Backend Cookbook
-│       └── machine-learning/        Machine Learning Cookbook
+│   ├── ai-and-ml/
+│   │   ├── rag/                     RAG Backend Cookbook
+│   │   ├── machine-learning/        Machine Learning Cookbook
+│   │   ├── deep-learning/           Deep Learning Cookbook (PyTorch)
+│   │   ├── reinforcement-learning/  Reinforcement Learning Cookbook
+│   │   └── ai-agents/               AI Agents Cookbook
+│   └── data/
+│       └── data-analysis/           Applied Data Analysis Cookbook
 ├── plans/                           # interactive trackers, each a Docker app
 │   ├── python-plan-app/             → http://localhost:8642
 │   ├── docker-plan-app/             → http://localhost:8643
@@ -29,6 +36,10 @@ MyLearnings/
 │   ├── ml-plan-app/                 → http://localhost:8647
 │   ├── rust-plan-app/               → http://localhost:8648
 │   ├── n8n-plan-app/                → http://localhost:8649  (workflow automation)
+│   ├── rl-plan-app/                 → http://localhost:8650  (reinforcement learning)
+│   ├── da-plan-app/                 → http://localhost:8651  (data analysis)
+│   ├── dl-plan-app/                 → http://localhost:8652  (deep learning)
+│   ├── agents-plan-app/             → http://localhost:8653  (AI agents)
 │   └── docker-compose.all.yml       # run ALL plans at once
 ├── tools/
 │   └── tunnel/                      tunnel.sh — reach the plans from your phone
@@ -52,6 +63,11 @@ MyLearnings/
 | RAG | `ai-and-ml/rag/` | RAG Sprint | 8646 | 3 wks |
 | Machine Learning | `ai-and-ml/machine-learning/` | Machine Learning Sprint | 8647 | 4 wks |
 | n8n (workflow automation) | `infrastructure/n8n/` | n8n Automation Sprint | 8649 | 3 wks |
+| Data Analysis | `data/data-analysis/` | Data Analysis Sprint | 8651 | 3 wks |
+| Machine Learning | `ai-and-ml/machine-learning/` | Machine Learning Sprint | 8647 | 4 wks |
+| Deep Learning (PyTorch) | `ai-and-ml/deep-learning/` | Deep Learning Sprint | 8652 | 4 wks |
+| Reinforcement Learning | `ai-and-ml/reinforcement-learning/` | Reinforcement Learning Sprint | 8650 | 4 wks |
+| AI Agents (LLM) | `ai-and-ml/ai-agents/` | AI Agents Sprint | 8653 | 3 wks |
 
 Redis, Queues, and Mailpit share one combined plan — the **Backend Infra Sprint**
 (8644) — because they're learned together as one async-backbone project.
@@ -81,7 +97,8 @@ docker compose up -d --build            # → http://localhost:8648
 ```bash
 cd plans
 docker compose -f docker-compose.all.yml up -d --build
-# Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648 · n8n 8649
+# Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648
+# n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653
 ```
 
 Stop everything with `docker compose -f docker-compose.all.yml down`.
@@ -132,6 +149,10 @@ The same trackers are also hosted (private to your account) as artifacts:
 - Machine Learning Sprint — https://claude.ai/code/artifact/d385d615-38bf-472e-95d3-a2630a056576
 - Rust Sprint — https://claude.ai/code/artifact/8c6b8a0e-1dbb-4e47-84dc-d7e0c7ee55d9
 - n8n Automation Sprint — https://claude.ai/code/artifact/b7e869f8-170b-4b6e-b3a3-ff3bbce0088c
+- Reinforcement Learning Sprint — https://claude.ai/code/artifact/b82b229e-0c30-40a7-8697-9aeda825fa83
+- Data Analysis Sprint — https://claude.ai/code/artifact/82211a03-5c24-46b8-b248-922a25fccf93
+- Deep Learning Sprint — https://claude.ai/code/artifact/3996997b-561a-412a-9fc8-f754da874ad2
+- AI Agents Sprint — https://claude.ai/code/artifact/b42ec521-d74c-481b-ae67-58a14966c4a5
 
 ## Reaching the plans from your phone
 
@@ -161,7 +182,19 @@ the same). See that folder's notes.
 1. **Python** (languages) — your main new backend language.
 2. **Docker** — containerize what you build.
 3. **Backend Infra** (Redis · Queues · Mailpit) — the async backbone.
-4. **RAG** then **Machine Learning** — the AI/ML layer, which builds on the above.
+
+Then the **AI/ML stack**, in dependency order:
+
+4. **Data Analysis** — the foundation: pandas, SQL, stats, viz. Everything below
+   starts as clean, well-understood data.
+5. **Machine Learning** — predict and detect patterns (regression, classification,
+   clustering).
+6. **Deep Learning** (PyTorch) — neural networks, for perceptual data and where
+   classic ML runs out.
+7. **Reinforcement Learning** — the "act on information" layer: agents that learn
+   which decisions pay off.
+8. **RAG** then **AI Agents** — the LLM application layer; agents build on the LLM
+   tool-calling in the Python book and use RAG for memory.
 
 **PHP & Laravel** and **Rust** are independent tracks — take Laravel when the work
 calls for it, and Rust when you want performance, memory safety, and a new mental

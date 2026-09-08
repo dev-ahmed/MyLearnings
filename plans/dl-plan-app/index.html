@@ -1,0 +1,183 @@
+<title>Deep Learning Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#f0eeec; --surface:#ffffff; --surface-2:#f7f4f2; --ink:#241a18;
+  --muted:#6b5f5c; --line:#e2dcd8; --line-strong:#cfc6c1;
+  --accent:#dc2626; --accent-ink:#ffffff; --accent-soft:#fbe0e0;
+  --done:#12925a; --done-soft:#e2f2e9; --accent2:#57534e;
+  --shadow:0 1px 2px rgba(20,24,32,.06), 0 8px 24px rgba(20,24,32,.06); --radius:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#181211; --surface:#211917; --surface-2:#2a201d; --ink:#f1e9e6;
+  --muted:#a99c98; --line:#382c29; --line-strong:#493a36;
+  --accent:#f87171; --accent-ink:#2a0b0b; --accent-soft:#3a1414;
+  --done:#43c489; --done-soft:#123024; --accent2:#a8a29e;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#181211; --surface:#211917; --surface-2:#2a201d; --ink:#f1e9e6;
+  --muted:#a99c98; --line:#382c29; --line-strong:#493a36;
+  --accent:#f87171; --accent-ink:#2a0b0b; --accent-soft:#3a1414;
+  --done:#43c489; --done-soft:#123024; --accent2:#a8a29e;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+header.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--accent2); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem} .principle p b{font-weight:600}
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em; color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0; border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px; border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft); padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent); border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px} @media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block} .reslist .d{color:var(--muted); font-size:.82rem}
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow"><span>Study Plan</span> · <span>Neural nets in PyTorch</span></div>
+    <h1>Deep Learning Sprint</h1>
+    <p class="lede">Four weeks to go from the tensor to a trained, served model in PyTorch — the full version of the ML book&#x27;s &#x27;taste&#x27; of deep learning. For a developer who knows Python and some ML. Mapped chapter-by-chapter to your Deep Learning cookbook.</p>
+    <div class="chips"><span class="chip">Profile: <b>Python + ML</b></span><span class="chip">Target: <b>train &amp; ship nets</b></span><span class="chip">Pace: <b>~12 hrs / week</b></span><span class="chip">Length: <b>4 weeks</b></span><span class="chip">Est: <b>~48 hrs</b></span></div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles"><div class="principle"><span class="n">01</span><p><b>Not everything needs deep learning.</b> Tabular data → gradient boosting; small data → simpler models. Always train the simple baseline first.</p></div><div class="principle"><span class="n">02</span><p><b>Own the training loop.</b> zero_grad → forward → loss → backward → step, every iteration. PyTorch hands you the loop on purpose — learn it, don't hide it.</p></div><div class="principle"><span class="n">03</span><p><b>Watch two loss curves.</b> Train + validation together diagnose overfitting, underfitting, and bad learning rates at a glance.</p></div><div class="principle"><span class="n">04</span><p><b>Transfer learning is the default.</b> Start from a pretrained backbone and match its preprocessing — that's how real DL gets done on modest data.</p></div><div class="principle"><span class="n">05</span><p><b>Ship the state_dict, in eval mode, with no_grad.</b> Save weights, recreate the model, and never forget model.eval().</p></div><div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~4 hrs/day × 3 days. Run every snippet; deep learning is muscle memory. Overfit one batch before every real run.</p></div></div>
+  <div class="sec-head"><h2>The four weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+  <div class="sec-head"><h2>Deep-learning-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">Tick every box and you can build, train, regularize, and ship neural networks in PyTorch.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+  <div class="sec-head"><h2>Reference &amp; your cookbooks</h2><div class="rule"></div></div>
+  <div class="panel"><ul class="reslist"><li><span class="k">Deep Learning Cookbook</span><span class="d">Your companion for every week (this set)</span></li><li><span class="k">Machine Learning Cookbook</span><span class="d">The classic-ML baseline DL must beat (this set)</span></li><li><a class="k" href="https://pytorch.org/tutorials/" target="_blank" rel="noopener">PyTorch tutorials</a><span class="d">Official hands-on tutorials</span></li><li><a class="k" href="https://pytorch.org/docs/stable/" target="_blank" rel="noopener">PyTorch docs</a><span class="d">API reference</span></li><li><a class="k" href="https://pytorch.org/vision/stable/models.html" target="_blank" rel="noopener">torchvision models</a><span class="d">Pretrained backbones for transfer learning</span></li><li><a class="k" href="https://huggingface.co/docs/transformers/" target="_blank" rel="noopener">Hugging Face transformers</a><span class="d">Pretrained models beyond vision</span></li></ul></div>
+  <footer>Deep Learning Sprint · progress saved in this browser · 4 weeks · ~48 hrs</footer>
+</div>
+<script>
+const WEEKS = [{"n": "WEEK 01", "title": "Tensors & autograd", "goal": "Master the two primitives everything is built on.", "read": [["Parts 1–3", "When DL · tensors · autograd"]], "readTasks": ["Read Part 1 (when deep learning, and when boosting wins) and Part 2 (tensors, shapes, GPU)", "Read Part 3 (autograd, the four-step dance, no_grad/eval)"], "build": ["Create tensors of image/tabular shapes; practise matmul, reduce, reshape, unsqueeze, permute — print .shape each time", "Move a tensor to the device; hit and fix a device-mismatch error", "With autograd, compute a gradient by hand and verify it (y = x²+2x+1)", "Minimise f(w)=(w-5)² by hand: forward, backward, w -= lr*grad, zero the grad — watch w → 5"], "outcome": "Fluent with tensors, shapes, and how gradients are computed."}, {"n": "WEEK 02", "title": "Modules & the training loop", "goal": "Build a network and train it end to end.", "read": [["Parts 4–6", "nn.Module · training loop · data"]], "readTasks": ["Read Part 4 (nn.Module, layers, activations, logits vs loss) and Part 5 (the training loop, optimizers, LR)", "Read Part 6 (Dataset/DataLoader, batching, normalisation, leakage)"], "build": ["Build an MLP with nn.Module; confirm one forward pass gives the right output shape and count its params", "Write the full training loop on a real dataset; track train + val loss per epoch and plot both", "Do the single-batch overfit test first; then break it on purpose with lr=10 (NaN) and lr=1e-6 (crawl)", "Wrap data in a Dataset + DataLoader (shuffle, num_workers); normalise on train only, then reproduce leakage by scaling before the split"], "outcome": "You can build and train a network and read its loss curves."}, {"n": "WEEK 03", "title": "CNNs, overfitting & transfer learning", "goal": "Train image models and stand on pretrained ones.", "read": [["Parts 7–9", "CNNs · regularization · transfer learning"]], "readTasks": ["Read Part 7 (convolutions, pooling, the flattened-size trap) and Part 8 (overfitting, dropout, weight decay, early stopping, train/eval)", "Read Part 9 (transfer learning: freeze, replace the head, fine-tune gently)"], "build": ["Build a CNN on CIFAR-10/Fashion-MNIST; find the post-conv size with a dummy forward pass; add augmentation and measure the gain", "Overfit a big model on small data on purpose, then add dropout + weight decay + early stopping and watch the val curve improve", "Fine-tune a pretrained ResNet: freeze it, replace the head, train just the head — compare speed/accuracy to the from-scratch CNN", "Match the pretrained model's preprocessing exactly; then unfreeze the top block at lr=1e-5 and judge help vs overfit"], "outcome": "You can train CNNs, fight overfitting, and use transfer learning."}, {"n": "WEEK 04", "title": "Ship it", "goal": "Save, reload, and serve a model correctly.", "read": [["Parts 10–11", "GPU/saving/serving · capstone"]], "readTasks": ["Read Part 10 (GPU, saving the state_dict, serving, ONNX)", "Read Part 11 (capstone + cheat sheet)"], "build": ["Save a model's state_dict, reload into a fresh instance with map_location, call eval(), and confirm predictions match", "Serve it behind a FastAPI /predict endpoint using torch.no_grad(), returning probabilities", "Export to ONNX and compare CPU inference speed to PyTorch", "Capstone: fine-tune a backbone on a small custom image set → evaluate → serve, end to end"], "outcome": "A trained, saved, and served deep-learning model — you can ship it."}];
+const FINAL = ["Judge when deep learning beats boosting (and when it doesn't)", "Work with tensors, shapes, and the GPU device", "Explain autograd and the four-step training dance", "Build a network with nn.Module and the right activations", "Output logits and pair them with the right loss", "Write and debug the training loop from scratch", "Read train/val curves for over/underfitting", "Feed data with Dataset/DataLoader; normalise without leakage", "Do the single-batch overfit sanity check", "Build a CNN and get the flattened size right", "Regularize with dropout, weight decay, early stopping", "Use model.train()/eval() and no_grad() correctly", "Fine-tune a pretrained backbone (transfer learning)", "Save/load the state_dict and serve with FastAPI"];
+const KEY = "dl-sprint-v1"; const THEME_KEY = "dl-theme";
+let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const weeksEl = document.getElementById("weeks");
+function taskItem(id, html){ const c = !!state[id];
+  return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
+WEEKS.forEach((w, wi) => {
+  let items = "";
+  items += `<div class="grp"><div class="label">Learn  ·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div><div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div><div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+  const det = document.createElement("details"); det.className = "week"; if (wi < 1) det.open = true;
+  det.innerHTML = `<summary><span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog"><div class="mini"><i data-wkfill="${wi}"></i></div><span class="count" data-wkcount="${wi}">0/0</span></div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary><div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0; boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length, pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`); const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null; if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
+  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
+const root=document.documentElement; let theme=null; try{ theme=localStorage.getItem(THEME_KEY); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{ const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches; const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
+document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
+refresh();
+</script>

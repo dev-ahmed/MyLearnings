@@ -8,7 +8,6 @@ interface EPUBViewerProps {
 const EPUBViewer = ({ url }: EPUBViewerProps) => {
   const viewerRef = useRef<HTMLDivElement>(null);
   const [rendition, setRendition] = useState<any>(null);
-  const [book, setBook] = useState<any>(null);
 
   useEffect(() => {
     if (!viewerRef.current) return;
@@ -16,12 +15,11 @@ const EPUBViewer = ({ url }: EPUBViewerProps) => {
     const newBook = ePub(url);
     const newRendition = newBook.renderTo(viewerRef.current, {
       width: '100%',
-      height: 600,
+      height: '100%',
       spread: 'none',
     });
 
     newRendition.display();
-    setBook(newBook);
     setRendition(newRendition);
 
     return () => {
@@ -33,22 +31,24 @@ const EPUBViewer = ({ url }: EPUBViewerProps) => {
   const prevPage = () => rendition?.prev();
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="bg-gray-800 p-4 mb-4 rounded-lg flex gap-4">
+    <div className="h-full flex flex-col">
+      <div className="bg-gray-800 px-6 py-3 flex gap-4 items-center justify-center border-b border-gray-700">
         <button
           onClick={prevPage}
-          className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+          className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          Previous
+          ← Previous
         </button>
         <button
           onClick={nextPage}
-          className="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700"
+          className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          Next
+          Next →
         </button>
       </div>
-      <div ref={viewerRef} className="border border-gray-700 bg-white" style={{ width: '800px', height: '600px' }} />
+      <div className="flex-1 bg-white overflow-hidden">
+        <div ref={viewerRef} className="w-full h-full" />
+      </div>
     </div>
   );
 };

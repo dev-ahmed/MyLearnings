@@ -1,0 +1,8 @@
+services:
+  agents-plan:
+    build: .
+    image: agents-plan:latest
+    container_name: agents-plan
+    ports:
+      - "8653:80"          # visit http://localhost:8653
+    restart: unless-stopped

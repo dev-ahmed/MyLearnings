@@ -1,0 +1,8 @@
+services:
+  rl-plan:
+    build: .
+    image: rl-plan:latest
+    container_name: rl-plan
+    ports:
+      - "8650:80"          # visit http://localhost:8650
+    restart: unless-stopped

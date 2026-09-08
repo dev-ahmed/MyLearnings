@@ -20,4 +20,6 @@ COPY server ./server
 
 EXPOSE 8650
 
+ENV NODE_ENV=production
+
 CMD ["node", "server/index.js"]

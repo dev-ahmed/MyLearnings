@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MyLearnings Hub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #0f1622;
+  --surface: #17212f;
+  --surface-2: #1b2736;
+  --ink: #eaf0f8;
+  --muted: #93a1b5;
+  --line: #26303f;
+  --line-strong: #34435a;
+  --accent: #22d3ee;
+  --accent-soft: #123039;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #0f1622 0%, #1b2736 100%);
+  color: var(--ink);
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+h1 {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  margin: 0 0 .5em;
+  background: linear-gradient(135deg, #22d3ee 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 1.2rem;
+  margin: 0 0 3rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 3rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 8px 30px rgba(34, 211, 238, 0.3);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.card-title {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.card-desc {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.books-card {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+  border-color: #16a34a;
+}
+
+.books-card:hover {
+  border-color: #22c55e;
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+}
+
+.books-card .card-title,
+.books-card .card-desc {
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .books-card {
+    grid-column: span 1;
+  }
+}
+
+.footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📚 MyLearnings Hub</h1>
+  <p class="subtitle">Your complete learning platform - Sprint plans & technical cookbooks in one place</p>
+
+  <div class="grid">
+    <a href="/books/" class="card books-card">
+      <span class="card-icon">📚</span>
+      <h2 class="card-title">Books Library</h2>
+      <p class="card-desc">Browse and read technical cookbooks on Python, Laravel, Rust, ML, RAG, Redis, n8n and more</p>
+    </a>
+
+    <a href="/plans/python" class="card">
+      <span class="card-icon">🐍</span>
+      <h2 class="card-title">Python Backend Sprint</h2>
+      <p class="card-desc">Django & FastAPI for Node developers</p>
+    </a>
+
+    <a href="/plans/docker" class="card">
+      <span class="card-icon">🐳</span>
+      <h2 class="card-title">Docker Deploy Sprint</h2>
+      <p class="card-desc">Containerization & deployment workflows</p>
+    </a>
+
+    <a href="/plans/backend-infra" class="card">
+      <span class="card-icon">🏗️</span>
+      <h2 class="card-title">Backend Infra Sprint</h2>
+      <p class="card-desc">Infrastructure & scaling patterns</p>
+    </a>
+
+    <a href="/plans/laravel" class="card">
+      <span class="card-icon">🔴</span>
+      <h2 class="card-title">Laravel Backend Sprint</h2>
+      <p class="card-desc">PHP Laravel for Node developers</p>
+    </a>
+
+    <a href="/plans/rag" class="card">
+      <span class="card-icon">🔍</span>
+      <h2 class="card-title">RAG Sprint</h2>
+      <p class="card-desc">Retrieval Augmented Generation systems</p>
+    </a>
+
+    <a href="/plans/ml" class="card">
+      <span class="card-icon">🤖</span>
+      <h2 class="card-title">Machine Learning Sprint</h2>
+      <p class="card-desc">Practical ML for production workflows</p>
+    </a>
+
+    <a href="/plans/rust" class="card">
+      <span class="card-icon">🦀</span>
+      <h2 class="card-title">Rust Sprint</h2>
+      <p class="card-desc">Rust for TypeScript developers</p>
+    </a>
+
+    <a href="/plans/n8n" class="card">
+      <span class="card-icon">⚡</span>
+      <h2 class="card-title">n8n Automation Sprint</h2>
+      <p class="card-desc">Workflow automation & integrations</p>
+    </a>
+  </div>
+
+  <div class="footer">
+    <p>🤖 MyLearnings Hub · All plans and books in one unified container</p>
+  </div>
+</div>
+</body>
+</html>
