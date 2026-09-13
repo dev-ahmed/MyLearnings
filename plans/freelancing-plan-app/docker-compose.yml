@@ -1,0 +1,8 @@
+services:
+  freelancing-plan:
+    build: .
+    image: freelancing-plan:latest
+    container_name: freelancing-plan
+    ports:
+      - "8659:80"          # visit http://localhost:8659
+    restart: unless-stopped

@@ -1,12 +1,12 @@
 # MyLearnings
 
-Your backend-engineering learning library — eighteen cookbooks (PDF + EPUB),
-seventeen interactive study plans (as self-hosted Docker apps), a QR launcher, and
+Your backend-engineering learning library — nineteen cookbooks (PDF + EPUB),
+eighteen interactive study plans (as self-hosted Docker apps), a QR launcher, and
 a tunnel tool to reach them from your phone. Framed for a developer fluent in
 Node.js/TypeScript moving into Python, PHP/Laravel, Rust, backend infrastructure,
 and the full AI/ML-engineering stack — the math foundation, data analysis, data
 engineering, machine learning, deep learning, reinforcement learning, RAG, agents,
-fine-tuning, MLOps, and cloud/Kubernetes.
+fine-tuning, MLOps, cloud/Kubernetes, and a career track on freelancing.
 
 ```
 MyLearnings/
@@ -19,7 +19,8 @@ MyLearnings/
 │   │   ├── redis/                   Redis Backend Cookbook
 │   │   ├── queues/                  Background Jobs & Queues Cookbook
 │   │   ├── mailpit/                 Mailpit Cookbook
-│   │   └── n8n/                     n8n Automation Cookbook
+│   │   ├── n8n/                     n8n Automation Cookbook
+│   │   └── cloud-kubernetes/        Cloud & Kubernetes for ML Cookbook
 │   ├── ai-and-ml/
 │   │   ├── rag/                     RAG Backend Cookbook
 │   │   ├── machine-learning/        Machine Learning Cookbook
@@ -33,8 +34,8 @@ MyLearnings/
 │   │   └── data-engineering/        Data Engineering Cookbook
 │   ├── foundations/
 │   │   └── math-for-ml/             Math for Machine Learning Cookbook
-│   └── infrastructure/
-│       └── cloud-kubernetes/        Cloud & Kubernetes for ML Cookbook
+│   └── career/
+│       └── freelancing/             Freelancing Success Cookbook
 ├── plans/                           # interactive trackers, each a Docker app
 │   ├── python-plan-app/             → http://localhost:8642
 │   ├── docker-plan-app/             → http://localhost:8643
@@ -53,6 +54,7 @@ MyLearnings/
 │   ├── dataeng-plan-app/            → http://localhost:8656  (data engineering)
 │   ├── k8s-plan-app/                → http://localhost:8657  (cloud & Kubernetes)
 │   ├── math-plan-app/               → http://localhost:8658  (math for ML)
+│   ├── freelancing-plan-app/        → http://localhost:8659  (freelancing success)
 │   └── docker-compose.all.yml       # run ALL plans at once
 ├── tools/
 │   └── tunnel/                      tunnel.sh — reach the plans from your phone
@@ -85,6 +87,7 @@ MyLearnings/
 | Fine-Tuning (LoRA/DPO) | `ai-and-ml/fine-tuning/` | Fine-Tuning Sprint | 8654 | 3 wks |
 | MLOps | `ai-and-ml/mlops/` | MLOps Sprint | 8655 | 4 wks |
 | Cloud & Kubernetes | `infrastructure/cloud-kubernetes/` | Cloud & Kubernetes Sprint | 8657 | 4 wks |
+| Freelancing (career) | `career/freelancing/` | Freelancing Success Sprint | 8659 | 4 wks |
 
 Redis, Queues, and Mailpit share one combined plan — the **Backend Infra Sprint**
 (8644) — because they're learned together as one async-backbone project.
@@ -116,7 +119,7 @@ cd plans
 docker compose -f docker-compose.all.yml up -d --build
 # Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648
 # n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653 · FineTuning 8654
-# MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658
+# MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658 · Freelancing 8659
 ```
 
 Stop everything with `docker compose -f docker-compose.all.yml down`.
@@ -176,6 +179,7 @@ The same trackers are also hosted (private to your account) as artifacts:
 - Data Engineering Sprint — https://claude.ai/code/artifact/1d397921-9226-414d-a9fc-e9b317288f14
 - Cloud & Kubernetes Sprint — https://claude.ai/code/artifact/66f37d0b-f0ac-4ec8-9c80-14bfa8e26ab9
 - Math for ML Sprint — https://claude.ai/code/artifact/308d65c0-db6f-4801-a831-5b978c372ac0
+- Freelancing Success Sprint — https://claude.ai/code/artifact/d35ea5c1-4642-4d38-86f3-b9ca5465140b
 
 ## Reaching the plans from your phone
 
@@ -232,6 +236,12 @@ Then the **shipping layer** — how all of the above reaches production:
     software. The engineering half of the ML-engineer role.
 13. **Cloud & Kubernetes** — run and scale services and models (GPUs, autoscaling,
     serving) on a cluster and the cloud.
+
+And a **parallel career track**, runnable any time once you have a sellable skill:
+
+- **Freelancing** — turn all of the above into income on Upwork, Toptal, Fiverr and
+  beyond. It leads with your rare AI/ML edge as a premium niche, so it pairs best
+  once you've built a couple of the technical tracks to show as proof.
 
 **PHP & Laravel** and **Rust** are independent tracks — take Laravel when the work
 calls for it, and Rust when you want performance, memory safety, and a new mental

@@ -30,10 +30,9 @@ REMOTE = "/opt/mylearnings"
 URL = os.environ.get("MYLEARNINGS_HUB_URL", "http://204.168.234.42")
 PM2_APP = "mylearnings-books"
 
-SLUGS = [
-    "agents", "backend-infra", "da", "dataeng", "dl", "docker", "ft", "k8s",
-    "laravel", "math", "ml", "mlops", "n8n", "python", "rag", "rl", "rust",
-]
+def slugs() -> list[str]:
+    """Every plan the hub actually holds, so a new sprint is verified for free."""
+    return sorted(p.stem for p in (HUB / "plans").glob("*.html"))
 
 
 def cyan(s): return f"\033[1;36m{s}\033[0m"
@@ -189,12 +188,13 @@ def verify() -> bool:
         if code != 200:
             failures.append(path)
 
-    bad = [s for s in SLUGS if _get(f"/plans/{s}", headers) != 200]
+    plans = slugs()
+    bad = [s for s in plans if _get(f"/plans/{s}", headers) != 200]
     if bad:
         failures.append(f"plans failing: {', '.join(bad)}")
-        print(f"  {red('✗')} {len(bad)} of {len(SLUGS)} plans failed")
+        print(f"  {red('✗')} {len(bad)} of {len(plans)} plans failed")
     else:
-        print(f"  {green('✓')} all {len(SLUGS)} plans → 200")
+        print(f"  {green('✓')} all {len(plans)} plans → 200")
 
     for problem in failures:
         print(f"  {red('!')} {problem}")

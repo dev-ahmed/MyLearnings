@@ -102,3 +102,9 @@ services:
     container_name: math-plan
     ports: ["8658:80"]
     restart: unless-stopped
+  freelancing-plan:
+    build: ./freelancing-plan-app
+    image: freelancing-plan:latest
+    container_name: freelancing-plan
+    ports: ["8659:80"]
+    restart: unless-stopped
