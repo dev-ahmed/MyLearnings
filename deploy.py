@@ -5,11 +5,15 @@ Run from anywhere:  python3 deploy.py   (or ./deploy.py)
 Stdlib only, no dependencies.
 
     ./deploy.py                 build, upload, restart, verify
+    ./deploy.py --update        only redo the steps whose inputs changed
+    ./deploy.py --full          ignore the cache and redo everything
     ./deploy.py --skip-build    reuse the existing books-viewer/dist
     ./deploy.py --dry-run       show what rsync would send, change nothing
     ./deploy.py --verify        only check the live site
 """
 import argparse
+import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -65,6 +69,60 @@ def ssh(script: str, quiet: bool = True) -> str:
     return run(["ssh", "-o", "BatchMode=yes", "-i", str(KEY), HOST, script], quiet=quiet)
 
 
+STATE_FILE = ROOT / ".deploy-state.json"
+
+SERVER_DEPS = '{ "cors": "^2.8.6", "express": "^5.2.1" }'
+
+
+def _hash_paths(paths) -> str:
+    """One digest over a set of files, covering content and relative path."""
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        if not path.is_file():
+            continue
+        digest.update(str(path.relative_to(ROOT)).encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def fingerprints() -> dict:
+    """What each deploy step depends on, so we can tell what genuinely moved.
+
+    Content hashes, not timestamps: touching a file or checking the repo out
+    afresh changes mtimes without changing what gets deployed.
+    """
+    viewer_sources = [
+        p for p in (VIEWER / "src").rglob("*")
+        if p.is_file() and p.suffix in (".ts", ".tsx", ".css", ".html")
+    ]
+    viewer_sources += [VIEWER / "package.json", VIEWER / "vite.config.ts"]
+
+    return {
+        "viewer": _hash_paths(viewer_sources),
+        "server": _hash_paths([HUB / "server" / "index.js"]),
+        "serverdeps": hashlib.sha256(SERVER_DEPS.encode()).hexdigest(),
+        "plans": _hash_paths((HUB / "plans").glob("*.html")),
+        "landing": _hash_paths([HUB / "index.html"]),
+        "cookbooks": _hash_paths(
+            p for p in (ROOT / "cookbooks").rglob("*")
+            if p.is_file() and p.suffix in (".pdf", ".epub")
+        ),
+    }
+
+
+def read_state() -> dict:
+    if not STATE_FILE.is_file():
+        return {}
+    try:
+        return json.loads(STATE_FILE.read_text())
+    except (json.JSONDecodeError, ValueError):
+        return {}
+
+
+def write_state(state: dict) -> None:
+    STATE_FILE.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n")
+
+
 def preflight() -> None:
     step("preflight")
     if not KEY.is_file():
@@ -99,7 +157,7 @@ def stage(into: Path) -> Path:
 
     (into / "hub" / "package.json").write_text(
         '{\n  "name": "mylearnings-hub",\n  "private": true,\n  "type": "module",\n'
-        '  "dependencies": { "cors": "^2.8.6", "express": "^5.2.1" }\n}\n'
+        f'  "dependencies": {SERVER_DEPS}\n}}\n'
     )
 
     for junk in into.rglob(".DS_Store"):
@@ -140,9 +198,10 @@ def upload(staged: Path, dry_run: bool) -> None:
     print(f"  {green('✓')} synced to {REMOTE} (root:root, 755/644)")
 
 
-def restart() -> None:
-    step("installing deps and restarting")
-    ssh(f"cd {REMOTE}/hub && npm install --omit=dev --silent")
+def restart(install: bool = True) -> None:
+    step("restarting the books API" + (" (with npm install)" if install else ""))
+    if install:
+        ssh(f"cd {REMOTE}/hub && npm install --omit=dev --silent")
     ssh(f"pm2 restart {PM2_APP} --update-env")
     print(f"  {green('✓')} {PM2_APP} restarted")
 
@@ -203,19 +262,50 @@ def verify() -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Deploy the MyLearnings hub.")
+    parser.add_argument("--update", action="store_true",
+                        help="only redo the steps whose inputs changed")
     parser.add_argument("--skip-build", action="store_true", help="reuse the existing dist")
     parser.add_argument("--dry-run", action="store_true", help="show what would be sent")
     parser.add_argument("--verify", action="store_true", help="only check the live site")
+    parser.add_argument("--full", action="store_true", help="ignore the cache and redo everything")
     args = parser.parse_args()
 
     if args.verify:
         sys.exit(0 if verify() else 1)
 
     preflight()
-    if not args.skip_build:
+
+    previous = {} if args.full else read_state()
+    current = fingerprints()
+    changed = {name for name, value in current.items() if previous.get(name) != value}
+
+    if args.update and not args.full:
+        if not previous:
+            print(dim("  no previous deploy recorded — doing a full one this time"))
+        else:
+            unchanged = sorted(set(current) - changed)
+            if unchanged:
+                print(dim(f"  unchanged since last deploy: {', '.join(unchanged)}"))
+
+    needs_build = "viewer" in changed or not (VIEWER / "dist" / "index.html").is_file()
+    needs_install = "serverdeps" in changed
+    needs_restart = "server" in changed or needs_install
+
+    if not args.update:
+        needs_build = needs_build or not args.skip_build
+        needs_install = True
+        needs_restart = True
+
+    if args.skip_build:
+        needs_build = False
+
+    if needs_build:
         build()
     elif not (VIEWER / "dist" / "index.html").is_file():
-        die("--skip-build given but books-viewer/dist is missing")
+        die("nothing to deploy: books-viewer/dist is missing and the build was skipped")
+    else:
+        step("skipping build")
+        print(f"  {dim('books-viewer unchanged')}")
 
     with tempfile.TemporaryDirectory(prefix="mylearnings-deploy-") as tmp:
         staged = stage(Path(tmp))
@@ -225,8 +315,16 @@ def main() -> None:
         print(f"\n{dim('dry run — nothing was changed')}")
         return
 
-    restart()
+    if needs_restart:
+        restart(install=needs_install)
+    else:
+        step("skipping restart")
+        print(f"  {dim('books API unchanged')}")
+
     ok = verify()
+    if ok:
+        write_state(current)
+
     print(f"\n{green('✓ deployed') if ok else red('✗ deployed with problems')} → {URL}")
     sys.exit(0 if ok else 1)
 
