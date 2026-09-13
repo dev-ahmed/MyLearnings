@@ -3,7 +3,11 @@ import { Book } from '../types';
 interface BookGridProps {
   books: Book[];
   onBookSelect: (book: Book) => void;
+  findPdf?: (book: Book) => Book | null;
 }
+
+const fileUrl = (book: Book) =>
+  `/books/api/books/file?path=${encodeURIComponent(book.path)}`;
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
@@ -14,10 +18,13 @@ const getCategoryColor = (category: string) => {
   return colors[category] || 'bg-gradient-to-br from-gray-600 to-gray-700';
 };
 
-const BookGrid = ({ books, onBookSelect }: BookGridProps) => {
+const BookGrid = ({ books, onBookSelect, findPdf = () => null }: BookGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {books.map((book, index) => (
+      {books.map((book, index) => {
+        const pdf = findPdf(book);
+
+        return (
         <div
           key={index}
           className="group bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 transition-all duration-300 border border-gray-700 hover:border-gray-600 hover:shadow-2xl hover:shadow-blue-900/20 hover:-translate-y-1 flex flex-col"
@@ -36,8 +43,28 @@ const BookGrid = ({ books, onBookSelect }: BookGridProps) => {
           >
             Read Now →
           </button>
+          {pdf && (
+            <div className="mt-2 flex gap-2">
+              <a
+                href={fileUrl(pdf)}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium text-center transition-colors"
+              >
+                🖨 Print
+              </a>
+              <a
+                href={fileUrl(pdf)}
+                download={pdf.filename}
+                className="flex-1 py-2 px-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium text-center transition-colors"
+              >
+                ⬇ PDF
+              </a>
+            </div>
+          )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

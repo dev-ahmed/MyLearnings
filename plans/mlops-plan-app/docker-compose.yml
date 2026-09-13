@@ -1,0 +1,8 @@
+services:
+  mlops-plan:
+    build: .
+    image: mlops-plan:latest
+    container_name: mlops-plan
+    ports:
+      - "8655:80"          # visit http://localhost:8655
+    restart: unless-stopped

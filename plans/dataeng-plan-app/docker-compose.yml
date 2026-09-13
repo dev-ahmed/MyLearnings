@@ -1,0 +1,8 @@
+services:
+  dataeng-plan:
+    build: .
+    image: dataeng-plan:latest
+    container_name: dataeng-plan
+    ports:
+      - "8656:80"          # visit http://localhost:8656
+    restart: unless-stopped

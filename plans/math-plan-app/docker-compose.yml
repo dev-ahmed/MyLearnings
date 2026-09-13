@@ -1,0 +1,8 @@
+services:
+  math-plan:
+    build: .
+    image: math-plan:latest
+    container_name: math-plan
+    ports:
+      - "8658:80"          # visit http://localhost:8658
+    restart: unless-stopped

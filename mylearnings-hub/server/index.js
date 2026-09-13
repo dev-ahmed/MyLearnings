@@ -8,14 +8,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 8650;
+const PORT = process.env.PORT || 8650;
 
 app.use(cors());
 app.use(express.json());
 
-const COOKBOOKS_PATH = process.env.NODE_ENV === 'production'
-  ? '/app/cookbooks'
-  : join(__dirname, '..', '..', 'cookbooks');
+const APP_ROOT = process.env.APP_ROOT
+  || (process.env.NODE_ENV === 'production'
+    ? '/app'
+    : join(__dirname, '..', '..'));
+
+const COOKBOOKS_PATH = join(APP_ROOT, 'cookbooks');
 
 const parseBookTitle = (filename) => {
   return filename
@@ -73,7 +76,7 @@ app.get('/api/books/file', async (req, res) => {
       return res.status(400).json({ error: 'Path is required' });
     }
 
-    const basePath = process.env.NODE_ENV === 'production' ? '/app' : join(__dirname, '..', '..');
+    const basePath = APP_ROOT;
     const fullPath = join(basePath, path);
 
     if (!fullPath.startsWith(basePath)) {

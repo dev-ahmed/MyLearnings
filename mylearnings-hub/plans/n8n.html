@@ -1,8 +1,16 @@
+<meta charset="utf-8">
 <title>n8n Automation Sprint</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+.hubcrumb{display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;padding:6px 12px;
+  border:1px solid var(--line);border-radius:999px;background:var(--surface-2);
+  color:var(--muted);text-decoration:none;font-size:.78rem;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;transition:all .18s}
+.hubcrumb:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+</style>
 <style>
 :root{
   --bg:#eef1f5; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#14202f;
@@ -100,6 +108,7 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 <button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
 <div class="wrap">
   <header class="hero">
+    <a class="hubcrumb" href="/">← <span>MyLearnings Hub</span></a>
     <div class="eyebrow"><span>Study Plan</span> · <span>Node.js dev → n8n</span></div>
     <h1>n8n Automation Sprint</h1>
     <p class="lede">Three weeks to go from zero to a self-hosted, AI-capable n8n you actually trust in production. Built for a Node.js developer: every concept maps to what you already do by hand — webhooks, glue code, queues, and RAG — except here you wire it on a canvas and drop into JavaScript only when you need to.</p>
@@ -107,9 +116,20 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
     <div class="overall">
       <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
       <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
-      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+      <div class="toolbar"><button class="btn" onclick="window.open('/books/?book=n8n', '_blank')">📖 Cookbook</button><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
     </div>
   </header>
+<!--HINTS:v1--><style>
+.hintlist{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.hintlist li{display:flex;gap:10px;font-size:.9rem;line-height:1.5;color:var(--ink)}
+.hintlist li::before{content:"";flex:none;width:6px;height:6px;margin-top:.55em;border-radius:50%;background:var(--accent)}
+.roadmap{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.roadmap li{display:grid;grid-template-columns:minmax(9.5rem,auto) 1fr;gap:12px;align-items:baseline;font-size:.9rem;line-height:1.5}
+.roadmap .wk{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.roadmap .oc{color:var(--ink)}
+.roadmap li.end .wk{color:var(--done,#16a34a)}
+@media (max-width:560px){.roadmap li{grid-template-columns:1fr}}
+</style><div class="sec-head"><h2>Before you start</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 11px;color:var(--muted);font-size:.9rem">What you should already know — shore up any gaps first:</p><ul class="hintlist"><li>Know Node.js and REST APIs / webhooks</li><li>Basic Docker</li><li>Comfortable reading and shaping JSON</li><li>The Background Jobs & Queues plan gives useful context</li></ul></div><div class="sec-head"><h2>What you'll be able to do</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 13px;color:var(--muted);font-size:.9rem">By the end of this plan — the payoff, week by week:</p><ul class="roadmap"><li><span class="wk">WEEK 01 · Nodes, triggers & your first flows</span><span class="oc">n8n running locally; you can build and execute trigger→action workflows.</span></li><li><span class="wk">WEEK 02 · Real automations: data, HTTP & the Code node</span><span class="oc">You can connect APIs, transform data, manage secrets, and handle failures.</span></li><li><span class="wk">WEEK 03 · AI workflows & real self-hosting</span><span class="oc">An AI workflow plus a persistent, queue-mode, secured n8n you can rely on.</span></li></ul></div>
   <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
   <div class="principles"><div class="principle"><span class="n">01</span><p><b>It's Node under the hood.</b> n8n runs on Node/TypeScript and every Code node is real JavaScript. When the visual nodes don't fit, you write code — you're never stuck.</p></div><div class="principle"><span class="n">02</span><p><b>Think in items.</b> Data flows between nodes as a list of JSON items. Once that clicks, expressions and the Code node stop being mysterious.</p></div><div class="principle"><span class="n">03</span><p><b>A workflow is a program.</b> Triggers, branches, error handling, secrets, and deploys all apply — treat it with the same rigor as an Express service, not as a toy.</p></div><div class="principle"><span class="n">04</span><p><b>Reach for the Code node last, not first.</b> Try the built-in nodes and expressions before writing JS; the point of n8n is to write less glue, not more.</p></div><div class="principle"><span class="n">05</span><p><b>Self-host it properly.</b> The default SQLite + single process is a demo. Real use means Postgres, a volume, an encryption key, and queue mode.</p></div><div class="principle"><span class="n">06</span><p><b>Know when NOT to.</b> High-throughput, latency-critical, or logic-heavy work still belongs in code (your Queues cookbook). n8n wins on glue, integrations, and speed of change.</p></div><div class="principle"><span class="n">07</span><p><b>Rhythm:</b> ~4 hrs/day × 3 days a week. End each session with a workflow that executes green — n8n's instant-run loop makes that easy.</p></div></div>
   <div class="sec-head"><h2>The three weeks</h2><div class="rule"></div></div>

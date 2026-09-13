@@ -45,7 +45,7 @@ describe('BookGrid', () => {
     const onBookSelect = vi.fn();
     render(<BookGrid books={mockBooks} onBookSelect={onBookSelect} />);
 
-    await user.click(screen.getByText('Test Book 1'));
+    await user.click(screen.getAllByRole('button', { name: /Read Now/ })[0]);
     expect(onBookSelect).toHaveBeenCalledWith(mockBooks[0]);
   });
 

@@ -1,8 +1,16 @@
+<meta charset="utf-8">
 <title>Laravel Backend Sprint</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+.hubcrumb{display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;padding:6px 12px;
+  border:1px solid var(--line);border-radius:999px;background:var(--surface-2);
+  color:var(--muted);text-decoration:none;font-size:.78rem;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;transition:all .18s}
+.hubcrumb:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+</style>
 <style>
 :root{
   --bg:#eef1f5; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#14202f;
@@ -100,6 +108,7 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 <button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
 <div class="wrap">
   <header class="hero">
+    <a class="hubcrumb" href="/">← <span>MyLearnings Hub</span></a>
     <div class="eyebrow"><span>Study Plan</span> · <span>Node.js → PHP → Laravel</span></div>
     <h1>Laravel Backend Sprint</h1>
     <p class="lede">Six weeks to turn your Node.js experience into production PHP and Laravel — one API grown through every week, mapped chapter-by-chapter to your PHP &amp; Laravel cookbook.</p>
@@ -107,9 +116,20 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
     <div class="overall">
       <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
       <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
-      <div class="toolbar"><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+      <div class="toolbar"><button class="btn" onclick="window.open('/books/?book=php-laravel', '_blank')">📖 Cookbook</button><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
     </div>
   </header>
+<!--HINTS:v1--><style>
+.hintlist{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.hintlist li{display:flex;gap:10px;font-size:.9rem;line-height:1.5;color:var(--ink)}
+.hintlist li::before{content:"";flex:none;width:6px;height:6px;margin-top:.55em;border-radius:50%;background:var(--accent)}
+.roadmap{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.roadmap li{display:grid;grid-template-columns:minmax(9.5rem,auto) 1fr;gap:12px;align-items:baseline;font-size:.9rem;line-height:1.5}
+.roadmap .wk{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.roadmap .oc{color:var(--ink)}
+.roadmap li.end .wk{color:var(--done,#16a34a)}
+@media (max-width:560px){.roadmap li{grid-template-columns:1fr}}
+</style><div class="sec-head"><h2>Before you start</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 11px;color:var(--muted);font-size:.9rem">What you should already know — shore up any gaps first:</p><ul class="hintlist"><li>Know Node.js / Express and JavaScript or TypeScript</li><li>REST APIs and the MVC pattern</li><li>Basic SQL</li><li>PHP installed locally (or just use Docker)</li></ul></div><div class="sec-head"><h2>What you'll be able to do</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 13px;color:var(--muted);font-size:.9rem">By the end of this plan — the payoff, week by week:</p><ul class="roadmap"><li><span class="wk">WEEK 01 · The PHP language & functional PHP</span><span class="oc">Idiomatic, type-checked PHP and fluent Collection pipelines.</span></li><li><span class="wk">WEEK 02 · Runtime, Composer & Laravel architecture</span><span class="oc">A routed app with DI, and a correct model of where work runs.</span></li><li><span class="wk">WEEK 03 · Routing, Eloquent & CRUD</span><span class="oc">A relational data layer and clean CRUD with no N+1 queries.</span></li><li><span class="wk">WEEK 04 · REST APIs, auth & security</span><span class="oc">A production-shaped, authenticated, hardened JSON API.</span></li><li><span class="wk">WEEK 05 · Architecture, queues, cache, HTTP, files, testing</span><span class="oc">Responsive endpoints, offloaded work, and a fast test suite.</span></li><li><span class="wk">WEEK 06 · Artisan, deployment, advanced & capstone</span><span class="oc">A deployable Laravel backend and portfolio-grade capstones.</span></li></ul></div>
   <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
   <div class="principles"><div class="principle"><span class="n">01</span><p><b>One app, six weeks.</b> Grow a single Projects/Tasks API — language, then framework, then production — so nothing is throwaway.</p></div><div class="principle"><span class="n">02</span><p><b>Map every concept to Node.</b> For each topic ask: what do I do in Express/Prisma, how is it done here, why is it different? The cookbook answers all three.</p></div><div class="principle"><span class="n">03</span><p><b>Types on from day one.</b> <span class='mono'>declare(strict_types=1)</span> + Larastan — the TypeScript rigor you already have, in PHP.</p></div><div class="principle"><span class="n">04</span><p><b>Lean on conventions.</b> Laravel does a lot for you (route model binding, Form Requests, Eloquent). Learn the drawers, don't fight them.</p></div><div class="principle"><span class="n">05</span><p><b>Thin controllers.</b> Validation in Form Requests, authorization in Policies, shape in Resources, logic in Actions when it grows.</p></div><div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~4 hrs/day × 5 days. End each day with a route you can hit or a test that passes.</p></div></div>
   <div class="sec-head"><h2>The six weeks</h2><div class="rule"></div></div>

@@ -3,10 +3,26 @@ import { Book } from './types';
 import BookGrid from './components/BookGrid';
 import BookViewer from './components/BookViewer';
 
+const requestedSlug = (): string | null =>
+  new URLSearchParams(window.location.search).get('book');
+
+const findBookBySlug = (books: Book[], slug: string): Book | null => {
+  const inFolder = books.filter(book => book.path.split('/').includes(slug));
+
+  return inFolder.find(book => book.format === 'epub') ?? inFolder[0] ?? null;
+};
+
+const folderOf = (book: Book): string =>
+  book.path.slice(0, book.path.lastIndexOf('/'));
+
+const findPdf = (books: Book[], epub: Book): Book | null =>
+  books.find(
+    book => book.format === 'pdf' && folderOf(book) === folderOf(epub)
+  ) ?? null;
+
 const App = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pdf' | 'epub'>('all');
 
   useEffect(() => {
     fetch('/books/api/books')
@@ -14,9 +30,15 @@ const App = () => {
       .then(data => setBooks(Array.isArray(data) ? data : []));
   }, []);
 
-  const filteredBooks = books.filter(book =>
-    filter === 'all' || book.format === filter
-  );
+  useEffect(() => {
+    const slug = requestedSlug();
+
+    if (!slug || books.length === 0) return;
+
+    setSelectedBook(findBookBySlug(books, slug));
+  }, [books]);
+
+  const epubs = books.filter(book => book.format === 'epub');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-blue-900 text-white">
@@ -26,44 +48,19 @@ const App = () => {
             <span className="text-4xl">📚</span>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">MyLearnings Books</h1>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${
-                filter === 'all'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-900/50 scale-105'
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => setFilter('pdf')}
-              className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${
-                filter === 'pdf'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-900/50 scale-105'
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              📄 PDF
-            </button>
-            <button
-              onClick={() => setFilter('epub')}
-              className={`px-5 py-2 rounded-lg font-medium transition-all duration-200 ${
-                filter === 'epub'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-900/50 scale-105'
-                  : 'bg-gray-700 hover:bg-gray-600'
-              }`}
-            >
-              📖 EPUB
-            </button>
-          </div>
+          <p className="text-sm text-gray-400">
+            {epubs.length} cookbooks · read in the browser, or take the PDF to print
+          </p>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {filteredBooks.length > 0 ? (
-          <BookGrid books={filteredBooks} onBookSelect={setSelectedBook} />
+        {epubs.length > 0 ? (
+          <BookGrid
+            books={epubs}
+            onBookSelect={setSelectedBook}
+            findPdf={epub => findPdf(books, epub)}
+          />
         ) : (
           <div className="text-center py-20">
             <p className="text-gray-400 text-lg">No books found</p>

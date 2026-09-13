@@ -1,0 +1,8 @@
+services:
+  k8s-plan:
+    build: .
+    image: k8s-plan:latest
+    container_name: k8s-plan
+    ports:
+      - "8657:80"          # visit http://localhost:8657
+    restart: unless-stopped

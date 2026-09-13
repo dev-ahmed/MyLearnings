@@ -1,11 +1,12 @@
 # MyLearnings
 
-Your backend-engineering learning library — thirteen cookbooks (PDF + EPUB),
-twelve interactive study plans (as self-hosted Docker apps), a QR launcher, and a
-tunnel tool to reach them from your phone. Framed for a developer fluent in
+Your backend-engineering learning library — eighteen cookbooks (PDF + EPUB),
+seventeen interactive study plans (as self-hosted Docker apps), a QR launcher, and
+a tunnel tool to reach them from your phone. Framed for a developer fluent in
 Node.js/TypeScript moving into Python, PHP/Laravel, Rust, backend infrastructure,
-and the full AI/ML stack — data analysis, machine learning, deep learning,
-reinforcement learning, RAG, and agents.
+and the full AI/ML-engineering stack — the math foundation, data analysis, data
+engineering, machine learning, deep learning, reinforcement learning, RAG, agents,
+fine-tuning, MLOps, and cloud/Kubernetes.
 
 ```
 MyLearnings/
@@ -24,9 +25,16 @@ MyLearnings/
 │   │   ├── machine-learning/        Machine Learning Cookbook
 │   │   ├── deep-learning/           Deep Learning Cookbook (PyTorch)
 │   │   ├── reinforcement-learning/  Reinforcement Learning Cookbook
-│   │   └── ai-agents/               AI Agents Cookbook
-│   └── data/
-│       └── data-analysis/           Applied Data Analysis Cookbook
+│   │   ├── ai-agents/               AI Agents Cookbook
+│   │   ├── fine-tuning/             Fine-Tuning Cookbook (LoRA/QLoRA/DPO)
+│   │   └── mlops/                   MLOps Cookbook
+│   ├── data/
+│   │   ├── data-analysis/           Applied Data Analysis Cookbook
+│   │   └── data-engineering/        Data Engineering Cookbook
+│   ├── foundations/
+│   │   └── math-for-ml/             Math for Machine Learning Cookbook
+│   └── infrastructure/
+│       └── cloud-kubernetes/        Cloud & Kubernetes for ML Cookbook
 ├── plans/                           # interactive trackers, each a Docker app
 │   ├── python-plan-app/             → http://localhost:8642
 │   ├── docker-plan-app/             → http://localhost:8643
@@ -40,6 +48,11 @@ MyLearnings/
 │   ├── da-plan-app/                 → http://localhost:8651  (data analysis)
 │   ├── dl-plan-app/                 → http://localhost:8652  (deep learning)
 │   ├── agents-plan-app/             → http://localhost:8653  (AI agents)
+│   ├── ft-plan-app/                 → http://localhost:8654  (fine-tuning)
+│   ├── mlops-plan-app/              → http://localhost:8655  (MLOps)
+│   ├── dataeng-plan-app/            → http://localhost:8656  (data engineering)
+│   ├── k8s-plan-app/                → http://localhost:8657  (cloud & Kubernetes)
+│   ├── math-plan-app/               → http://localhost:8658  (math for ML)
 │   └── docker-compose.all.yml       # run ALL plans at once
 ├── tools/
 │   └── tunnel/                      tunnel.sh — reach the plans from your phone
@@ -63,11 +76,15 @@ MyLearnings/
 | RAG | `ai-and-ml/rag/` | RAG Sprint | 8646 | 3 wks |
 | Machine Learning | `ai-and-ml/machine-learning/` | Machine Learning Sprint | 8647 | 4 wks |
 | n8n (workflow automation) | `infrastructure/n8n/` | n8n Automation Sprint | 8649 | 3 wks |
+| Math for ML | `foundations/math-for-ml/` | Math for ML Sprint | 8658 | 3 wks |
 | Data Analysis | `data/data-analysis/` | Data Analysis Sprint | 8651 | 3 wks |
-| Machine Learning | `ai-and-ml/machine-learning/` | Machine Learning Sprint | 8647 | 4 wks |
+| Data Engineering | `data/data-engineering/` | Data Engineering Sprint | 8656 | 4 wks |
 | Deep Learning (PyTorch) | `ai-and-ml/deep-learning/` | Deep Learning Sprint | 8652 | 4 wks |
 | Reinforcement Learning | `ai-and-ml/reinforcement-learning/` | Reinforcement Learning Sprint | 8650 | 4 wks |
 | AI Agents (LLM) | `ai-and-ml/ai-agents/` | AI Agents Sprint | 8653 | 3 wks |
+| Fine-Tuning (LoRA/DPO) | `ai-and-ml/fine-tuning/` | Fine-Tuning Sprint | 8654 | 3 wks |
+| MLOps | `ai-and-ml/mlops/` | MLOps Sprint | 8655 | 4 wks |
+| Cloud & Kubernetes | `infrastructure/cloud-kubernetes/` | Cloud & Kubernetes Sprint | 8657 | 4 wks |
 
 Redis, Queues, and Mailpit share one combined plan — the **Backend Infra Sprint**
 (8644) — because they're learned together as one async-backbone project.
@@ -98,7 +115,8 @@ docker compose up -d --build            # → http://localhost:8648
 cd plans
 docker compose -f docker-compose.all.yml up -d --build
 # Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648
-# n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653
+# n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653 · FineTuning 8654
+# MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658
 ```
 
 Stop everything with `docker compose -f docker-compose.all.yml down`.
@@ -153,6 +171,11 @@ The same trackers are also hosted (private to your account) as artifacts:
 - Data Analysis Sprint — https://claude.ai/code/artifact/82211a03-5c24-46b8-b248-922a25fccf93
 - Deep Learning Sprint — https://claude.ai/code/artifact/3996997b-561a-412a-9fc8-f754da874ad2
 - AI Agents Sprint — https://claude.ai/code/artifact/b42ec521-d74c-481b-ae67-58a14966c4a5
+- Fine-Tuning Sprint — https://claude.ai/code/artifact/d29b2566-4b1c-4034-baf8-07c1432cbf5c
+- MLOps Sprint — https://claude.ai/code/artifact/a8468246-4ee9-4bb1-a7f4-8d7b538dbeb8
+- Data Engineering Sprint — https://claude.ai/code/artifact/1d397921-9226-414d-a9fc-e9b317288f14
+- Cloud & Kubernetes Sprint — https://claude.ai/code/artifact/66f37d0b-f0ac-4ec8-9c80-14bfa8e26ab9
+- Math for ML Sprint — https://claude.ai/code/artifact/308d65c0-db6f-4801-a831-5b978c372ac0
 
 ## Reaching the plans from your phone
 
@@ -183,18 +206,32 @@ the same). See that folder's notes.
 2. **Docker** — containerize what you build.
 3. **Backend Infra** (Redis · Queues · Mailpit) — the async backbone.
 
-Then the **AI/ML stack**, in dependency order:
+Then the **AI/ML-engineering stack**, in dependency order:
 
-4. **Data Analysis** — the foundation: pandas, SQL, stats, viz. Everything below
+4. **Math for ML** (foundations) — *optional but clarifying*: the intuition under
+   everything below (vectors, gradients, probability). Take it first if you want
+   the internals, or dip in when a concept bites.
+5. **Data Analysis** — the foundation: pandas, SQL, stats, viz. Everything below
    starts as clean, well-understood data.
-5. **Machine Learning** — predict and detect patterns (regression, classification,
+6. **Data Engineering** — reliable pipelines (ELT, orchestration, warehouses) that
+   *deliver* that data at scale.
+7. **Machine Learning** — predict and detect patterns (regression, classification,
    clustering).
-6. **Deep Learning** (PyTorch) — neural networks, for perceptual data and where
+8. **Deep Learning** (PyTorch) — neural networks, for perceptual data and where
    classic ML runs out.
-7. **Reinforcement Learning** — the "act on information" layer: agents that learn
+9. **Reinforcement Learning** — the "act on information" layer: agents that learn
    which decisions pay off.
-8. **RAG** then **AI Agents** — the LLM application layer; agents build on the LLM
-   tool-calling in the Python book and use RAG for memory.
+10. **RAG** then **AI Agents** — the LLM application layer; agents build on the LLM
+    tool-calling in the Python book and use RAG for memory.
+11. **Fine-Tuning** — change the model's weights only when prompting, RAG, and
+    agents can't get there. It builds on all of the above.
+
+Then the **shipping layer** — how all of the above reaches production:
+
+12. **MLOps** — track, version, serve, monitor, and retrain models like real
+    software. The engineering half of the ML-engineer role.
+13. **Cloud & Kubernetes** — run and scale services and models (GPUs, autoscaling,
+    serving) on a cluster and the cloud.
 
 **PHP & Laravel** and **Rust** are independent tracks — take Laravel when the work
 calls for it, and Rust when you want performance, memory safety, and a new mental

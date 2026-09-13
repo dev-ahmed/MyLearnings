@@ -1,0 +1,203 @@
+<meta charset="utf-8">
+<title>Cloud & Kubernetes Sprint</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+.hubcrumb{display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;padding:6px 12px;
+  border:1px solid var(--line);border-radius:999px;background:var(--surface-2);
+  color:var(--muted);text-decoration:none;font-size:.78rem;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;transition:all .18s}
+.hubcrumb:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+</style>
+<style>
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --surface-2:#f4f7fb; --ink:#14202f;
+  --muted:#56637a; --line:#d8dee8; --line-strong:#c2cbd8;
+  --accent:#0369a1; --accent-ink:#ffffff; --accent-soft:#d4e9f5;
+  --done:#12925a; --done-soft:#e2f2e9; --accent2:#475569;
+  --shadow:0 1px 2px rgba(20,24,32,.06), 0 8px 24px rgba(20,24,32,.06); --radius:14px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1622; --surface:#17212f; --surface-2:#1b2736; --ink:#eaf0f8;
+  --muted:#93a1b5; --line:#26303f; --line-strong:#34435a;
+  --accent:#38bdf8; --accent-ink:#04202e; --accent-soft:#0b2d3e;
+  --done:#43c489; --done-soft:#123024; --accent2:#94a3b8;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --surface:#17212f; --surface-2:#1b2736; --ink:#eaf0f8;
+  --muted:#93a1b5; --line:#26303f; --line-strong:#34435a;
+  --accent:#38bdf8; --accent-ink:#04202e; --accent-soft:#0b2d3e;
+  --done:#43c489; --done-soft:#123024; --accent2:#94a3b8;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.55; -webkit-font-smoothing:antialiased}
+.wrap{max-width:920px; margin:0 auto; padding:28px 20px 80px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif; line-height:1.1; text-wrap:balance; margin:0}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted)}
+.mono{font-family:"IBM Plex Mono",monospace}
+a{color:var(--accent); text-decoration:none} a:hover{text-decoration:underline}
+header.hero{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:26px 26px 22px; position:relative; overflow:hidden}
+header.hero::before{content:""; position:absolute; inset:0 0 auto 0; height:4px; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.hero .eyebrow{display:flex; gap:10px; align-items:center}
+.hero h1{font-size:clamp(2rem,5.5vw,3.1rem); font-weight:800; margin:.35em 0 .15em; letter-spacing:-.02em}
+.hero .lede{color:var(--muted); font-size:1.02rem; max-width:60ch; margin:0}
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px}
+.chip{font-family:"IBM Plex Mono",monospace; font-size:.74rem; padding:5px 10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); white-space:nowrap}
+.chip b{color:var(--accent); font-weight:600}
+.overall{margin-top:22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap}
+.overall .bar{flex:1 1 240px; min-width:200px}
+.bartrack{height:10px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.barfill{height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.pct{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.5rem; font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+.pct small{font-size:.8rem; color:var(--muted); font-weight:400}
+.btn{font-family:"IBM Plex Mono",monospace; font-size:.75rem; cursor:pointer; color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:8px; padding:7px 11px}
+.btn:hover{color:var(--ink); border-color:var(--line-strong)}
+.toolbar{display:flex; gap:8px; align-items:center}
+.sec-head{display:flex; align-items:baseline; gap:12px; margin:34px 4px 12px}
+.sec-head h2{font-size:1.3rem; font-weight:700; letter-spacing:-.01em}
+.sec-head .rule{flex:1; height:1px; background:var(--line)}
+.principles{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px}
+.principle{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.principle .n{font-family:"IBM Plex Mono",monospace; color:var(--accent2); font-weight:600; font-size:.8rem}
+.principle p{margin:.3em 0 0; font-size:.9rem} .principle p b{font-weight:600}
+.week{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden}
+.week[open]{border-color:var(--line-strong)}
+.week summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px}
+.week summary::-webkit-details-marker{display:none}
+.wknum{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:.78rem; letter-spacing:.1em; color:var(--accent-ink); background:var(--accent); padding:6px 10px; border-radius:8px; white-space:nowrap}
+.week.done .wknum{background:var(--done)}
+.summary-main{flex:1; min-width:0}
+.summary-main h3{font-size:1.12rem; font-weight:700; letter-spacing:-.01em}
+.summary-main .goal{font-size:.86rem; color:var(--muted); margin-top:2px}
+.wkprog{display:flex; align-items:center; gap:10px; flex-shrink:0}
+.wkprog .mini{width:64px; height:7px; border-radius:999px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+.wkprog .mini > i{display:block; height:100%; width:0%; background:var(--done); transition:width .3s}
+.wkprog .count{font-family:"IBM Plex Mono",monospace; font-size:.75rem; color:var(--muted); font-variant-numeric:tabular-nums; min-width:34px; text-align:right}
+.chev{color:var(--muted); transition:transform .2s; flex-shrink:0}
+.week[open] .chev{transform:rotate(90deg)}
+.week .body{padding:2px 20px 20px; border-top:1px solid var(--line)}
+.grp{margin-top:16px}
+.grp .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px}
+.grp .label::after{content:""; flex:1; height:1px; background:var(--line)}
+.tasklist{list-style:none; margin:8px 0 0; padding:0}
+.task{display:flex; gap:11px; align-items:flex-start; padding:7px 0}
+.task input{appearance:none; -webkit-appearance:none; margin:2px 0 0; width:19px; height:19px; flex-shrink:0; border:1.8px solid var(--line-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative; transition:.15s}
+.task input:hover{border-color:var(--accent)}
+.task input:checked{background:var(--done); border-color:var(--done)}
+.task input:checked::after{content:""; position:absolute; left:5px; top:1.5px; width:5px; height:10px; border:solid #fff; border-width:0 2.2px 2.2px 0; transform:rotate(43deg)}
+.task input:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.task label{font-size:.93rem; cursor:pointer}
+.task label .ref{font-family:"IBM Plex Mono",monospace; font-size:.76rem; color:var(--accent); background:var(--accent-soft); padding:1px 6px; border-radius:5px; margin-left:2px; white-space:nowrap}
+.task.checked label{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--line-strong)}
+.outcome{margin-top:16px; padding:12px 14px; background:var(--done-soft); border:1px solid color-mix(in srgb,var(--done) 30%,transparent); border-radius:10px; font-size:.88rem}
+.outcome b{color:var(--done); font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:3px}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px}
+.check2{columns:2; column-gap:26px} @media(max-width:600px){.check2{columns:1}}
+.check2 .task{break-inside:avoid}
+.reslist{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px}
+.reslist li{padding:11px 14px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; font-size:.88rem}
+.reslist .k{font-weight:600; display:block} .reslist .d{color:var(--muted); font-size:.82rem}
+footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; font-family:"IBM Plex Mono",monospace}
+.themebtn{position:fixed; top:14px; right:14px; z-index:5; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; box-shadow:var(--shadow); font-size:1rem; line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<button class="themebtn" id="theme" aria-label="Toggle theme">◑</button>
+<div class="wrap">
+  <header class="hero">
+    <a class="hubcrumb" href="/">← <span>MyLearnings Hub</span></a>
+    <div class="eyebrow"><span>Study Plan</span> · <span>Run &amp; scale in prod</span></div>
+    <h1>Cloud &amp; Kubernetes Sprint</h1>
+    <p class="lede">Four weeks to run and scale services and models on Kubernetes and the cloud — core objects, config, networking, autoscaling, GPUs, model serving, and cost. The infra half of shipping ML. Builds on your Docker skills. Mapped chapter-by-chapter to your Cloud &amp; Kubernetes for ML cookbook.</p>
+    <div class="chips"><span class="chip">Profile: <b>containerizes apps</b></span><span class="chip">Target: <b>operate k8s</b></span><span class="chip">Pace: <b>~12 hrs / week</b></span><span class="chip">Length: <b>4 weeks</b></span><span class="chip">Est: <b>~48 hrs</b></span></div>
+    <div class="overall">
+      <div class="pct"><span id="pctNum">0</span>%<br><small><span id="doneNum">0</span> of <span id="totalNum">0</span> tasks done</small></div>
+      <div class="bar"><div class="bartrack"><div class="barfill" id="overallFill"></div></div></div>
+      <div class="toolbar"><button class="btn" onclick="window.open('/books/?book=cloud-kubernetes', '_blank')">📖 Cookbook</button><button class="btn" id="expandAll">Expand all</button><button class="btn" id="reset">Reset</button></div>
+    </div>
+  </header>
+<!--HINTS:v1--><style>
+.hintlist{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.hintlist li{display:flex;gap:10px;font-size:.9rem;line-height:1.5;color:var(--ink)}
+.hintlist li::before{content:"";flex:none;width:6px;height:6px;margin-top:.55em;border-radius:50%;background:var(--accent)}
+.roadmap{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.roadmap li{display:grid;grid-template-columns:minmax(9.5rem,auto) 1fr;gap:12px;align-items:baseline;font-size:.9rem;line-height:1.5}
+.roadmap .wk{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.roadmap .oc{color:var(--ink)}
+.roadmap li.end .wk{color:var(--done,#16a34a)}
+@media (max-width:560px){.roadmap li{grid-template-columns:1fr}}
+</style><div class="sec-head"><h2>Before you start</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 11px;color:var(--muted);font-size:.9rem">What you should already know — shore up any gaps first:</p><ul class="hintlist"><li>Comfortable with Docker and containers (the Docker plan)</li><li>Basic YAML and command-line comfort</li><li>Understand services, ports, and load balancing</li><li>A cloud account is optional — a local cluster (kind/minikube) is enough</li></ul></div><div class="sec-head"><h2>What you'll be able to do</h2><div class="rule"></div></div><div class="panel"><p style="margin:0 0 13px;color:var(--muted);font-size:.9rem">By the end of this plan — the payoff, week by week:</p><ul class="roadmap"><li><span class="wk">WEEK 01 · Decide & the core objects</span><span class="oc">A self-healing, load-balanced app on a local cluster.</span></li><li><span class="wk">WEEK 02 · Config & networking</span><span class="oc">Config-driven, health-checked, ingress-routed services.</span></li><li><span class="wk">WEEK 03 · Scaling & GPUs</span><span class="oc">Two-layer autoscaling and cost-aware GPU usage.</span></li><li><span class="wk">WEEK 04 · Serve models, IaC & ops</span><span class="oc">A packaged, monitored, cost-capped model service on k8s.</span></li></ul></div>
+  <div class="sec-head"><h2>How to run this</h2><div class="rule"></div></div>
+  <div class="principles"><div class="principle"><span class="n">01</span><p><b>You probably don't need Kubernetes.</b> Use the lowest rung — PaaS, managed endpoint, managed k8s — that runs your workload. Learn it anyway; it's everywhere.</p></div><div class="principle"><span class="n">02</span><p><b>Declare desired state; let it converge.</b> Edit YAML and apply; don't hand-run imperative changes in prod. It's a control loop, not a script.</p></div><div class="principle"><span class="n">03</span><p><b>Set requests/limits and the right probes.</b> Especially a startup probe for model loading — most cluster pain traces here.</p></div><div class="principle"><span class="n">04</span><p><b>Scale both layers, with caps.</b> HPA (pods) + cluster autoscaler (nodes); scale GPUs to zero; bound the max so a spike can't run away.</p></div><div class="principle"><span class="n">05</span><p><b>Watch cost and health.</b> Idle GPUs and over-requests are the bill — monitor, right-size, and cap, or let a managed platform do it.</p></div><div class="principle"><span class="n">06</span><p><b>Rhythm:</b> ~4 hrs/day × 3 days on a local cluster (kind/minikube/k3s). No cloud bill needed to learn the core.</p></div></div>
+  <div class="sec-head"><h2>The four weeks</h2><div class="rule"></div></div>
+  <div id="weeks"></div>
+  <div class="sec-head"><h2>Kubernetes-ready checklist</h2><div class="rule"></div></div>
+  <div class="panel">
+    <p style="margin:0 0 6px; color:var(--muted); font-size:.9rem">Tick every box and you can run and scale services and models on Kubernetes.</p>
+    <ul class="tasklist check2" id="finalList"></ul>
+  </div>
+  <div class="sec-head"><h2>Reference &amp; your cookbooks</h2><div class="rule"></div></div>
+  <div class="panel"><ul class="reslist"><li><span class="k">Cloud &amp; Kubernetes for ML Cookbook</span><span class="d">Your companion for every week (this set)</span></li><li><span class="k">Docker &amp; MLOps Cookbooks</span><span class="d">Containers you&#x27;ll run and models you&#x27;ll serve (this set)</span></li><li><a class="k" href="https://kubernetes.io/docs/home/" target="_blank" rel="noopener">Kubernetes docs</a><span class="d">The official reference</span></li><li><a class="k" href="https://kind.sigs.k8s.io/" target="_blank" rel="noopener">kind (local clusters)</a><span class="d">Run k8s locally to learn</span></li><li><a class="k" href="https://helm.sh/docs/" target="_blank" rel="noopener">Helm</a><span class="d">Package manager for k8s</span></li><li><a class="k" href="https://kserve.github.io/website/" target="_blank" rel="noopener">KServe</a><span class="d">Kubernetes-native model serving</span></li></ul></div>
+  <footer>Cloud &amp; Kubernetes Sprint · progress saved in this browser · 4 weeks · ~48 hrs</footer>
+</div>
+<script>
+const WEEKS = [{"n": "WEEK 01", "title": "Decide & the core objects", "goal": "Judge if you need k8s, then run a self-healing app on it.", "read": [["Parts 1–2", "When (not) to use k8s · pods/deployments/services"]], "readTasks": ["Read Part 1 (the deployment ladder; when a PaaS/managed endpoint beats k8s)", "Read Part 2 (pods, deployments, services)"], "build": ["For three workloads, pick the lowest rung that runs each (PaaS / managed endpoint / managed k8s / self-managed)", "Spin up a local cluster (kind/minikube/k3s)", "Deploy a containerized app via a Deployment (3 replicas, resource requests/limits) + a Service", "Delete a pod and watch it self-heal; scale to 5 by editing YAML and re-applying"], "outcome": "A self-healing, load-balanced app on a local cluster."}, {"n": "WEEK 02", "title": "Config & networking", "goal": "Externalize config, add health probes, and route traffic.", "read": [["Parts 3–4", "Config/secrets/probes · services & ingress"]], "readTasks": ["Read Part 3 (ConfigMaps, Secrets, liveness/readiness/startup probes)", "Read Part 4 (service types, Ingress, TLS)"], "build": ["Move a deployment's config to a ConfigMap and secrets to a Secret, injected as env — rebuild nothing", "Add readiness + liveness probes on /health; simulate a slow model load and fix the restart loop with a startup probe", "Install an ingress controller; route /app and /models to two services through one entry point", "Add local TLS and confirm HTTPS terminates at the ingress"], "outcome": "Config-driven, health-checked, ingress-routed services."}, {"n": "WEEK 03", "title": "Scaling & GPUs", "goal": "Autoscale pods and nodes; run GPUs without burning money.", "read": [["Parts 5–6", "Autoscaling · GPUs on k8s"]], "readTasks": ["Read Part 5 (HPA, cluster autoscaler, horizontal vs vertical)", "Read Part 6 (requesting GPUs, scale-to-zero pools, spot, cost)"], "build": ["Add an HPA (CPU 70%, min 2, max 10); load-test and watch replicas scale up then down", "(Cloud) enable the cluster autoscaler and drive load until nodes are added, then removed when idle", "(Cloud) add a scale-to-zero GPU node pool; run a training Job requesting 1 GPU and watch a node appear then vanish", "Compare your GPU setup's monthly cost to a managed inference endpoint for the same workload"], "outcome": "Two-layer autoscaling and cost-aware GPU usage."}, {"n": "WEEK 04", "title": "Serve models, IaC & ops", "goal": "Serve a model on k8s, package it, and operate it affordably.", "read": [["Parts 7–10", "Model serving · Helm/Terraform · cost & ops · capstone"]], "readTasks": ["Read Part 7 (serving models the plain way vs KServe/Triton) and Part 8 (Helm, Terraform, GitOps)", "Read Part 9 (cost & operations) and Part 10 (capstone + cheat sheet)"], "build": ["Deploy a registered model (MLOps book) the plain way: Deployment (startup probe) + Service + Ingress + HPA; load-test", "Package it as a Helm chart with dev/prod values; practice helm upgrade and rollback", "Stand up Prometheus + Grafana; dashboard node utilization + app latency; add a restart-loop alert and maxReplicas caps", "Capstone: take a containerized model to a scalable, monitored k8s service end to end"], "outcome": "A packaged, monitored, cost-capped model service on k8s."}];
+const FINAL = ["Choose the right rung (PaaS / managed endpoint / k8s)", "Explain pods, deployments, and services", "Deploy a self-healing app and scale it", "Set resource requests and limits", "Externalize config with ConfigMaps and Secrets", "Use readiness, liveness, and startup probes correctly", "Route HTTP with a single Ingress + TLS", "Autoscale pods (HPA) and nodes (cluster autoscaler) with caps", "Request and cost-manage GPUs (scale-to-zero, spot)", "Serve a model on k8s (plain, or KServe/Triton when justified)", "Package workloads as Helm charts (upgrade + rollback)", "Define cloud infra with Terraform", "Monitor with Prometheus/Grafana and alert", "Control cost: right-size, scale-to-zero, cap the max"];
+const KEY = "k8s-sprint-v1"; const THEME_KEY = "k8s-theme";
+let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const weeksEl = document.getElementById("weeks");
+function taskItem(id, html){ const c = !!state[id];
+  return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
+WEEKS.forEach((w, wi) => {
+  let items = "";
+  items += `<div class="grp"><div class="label">Learn  ·  ${w.read.map(r=>r[1]).join(' / ')}</div><ul class="tasklist">`;
+  w.readTasks.forEach((t,i)=> items += taskItem(`w${wi}r${i}`, t));
+  items += `</ul></div><div class="grp"><div class="label">Build</div><ul class="tasklist">`;
+  w.build.forEach((t,i)=> items += taskItem(`w${wi}b${i}`, t));
+  items += `</ul></div><div class="outcome"><b>Checkpoint</b>${w.outcome}</div>`;
+  const det = document.createElement("details"); det.className = "week"; if (wi < 1) det.open = true;
+  det.innerHTML = `<summary><span class="wknum">${w.n}</span>
+      <div class="summary-main"><h3>${w.title}</h3><div class="goal">${w.goal}</div></div>
+      <div class="wkprog"><div class="mini"><i data-wkfill="${wi}"></i></div><span class="count" data-wkcount="${wi}">0/0</span></div>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </summary><div class="body">${items}</div>`;
+  weeksEl.appendChild(det);
+});
+const finalEl = document.getElementById("finalList");
+FINAL.forEach((t,i)=> finalEl.insertAdjacentHTML("beforeend", taskItem(`f${i}`, t)));
+function refresh(){
+  const boxes = [...document.querySelectorAll('input[type=checkbox]')];
+  let done = 0; boxes.forEach(b=>{ if(b.checked) done++; });
+  const total = boxes.length, pct = total? Math.round(done/total*100):0;
+  document.getElementById("overallFill").style.width = pct+"%";
+  document.getElementById("pctNum").textContent = pct;
+  document.getElementById("doneNum").textContent = done;
+  document.getElementById("totalNum").textContent = total;
+  WEEKS.forEach((w,wi)=>{
+    const wb = [...document.querySelectorAll(`#weeks input[id^="w${wi}r"], #weeks input[id^="w${wi}b"]`)];
+    const wd = wb.filter(b=>b.checked).length;
+    const fill = document.querySelector(`[data-wkfill="${wi}"]`); const cnt = document.querySelector(`[data-wkcount="${wi}"]`);
+    if(fill) fill.style.width = wb.length? (wd/wb.length*100)+"%":"0%";
+    if(cnt) cnt.textContent = `${wd}/${wb.length}`;
+    const card = fill? fill.closest("details"):null; if(card) card.classList.toggle("done", wb.length>0 && wd===wb.length);
+  });
+}
+document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
+  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+let allOpen=false;
+document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
+  document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
+const root=document.documentElement; let theme=null; try{ theme=localStorage.getItem(THEME_KEY); }catch(e){}
+if(theme) root.setAttribute("data-theme", theme);
+document.getElementById("theme").addEventListener("click", ()=>{ const cur = root.getAttribute("data-theme");
+  const dark = cur? cur==="dark" : matchMedia("(prefers-color-scheme:dark)").matches; const next = dark? "light":"dark";
+  root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
+document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
+refresh();
+</script>

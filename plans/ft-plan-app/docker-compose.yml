@@ -1,0 +1,8 @@
+services:
+  ft-plan:
+    build: .
+    image: ft-plan:latest
+    container_name: ft-plan
+    ports:
+      - "8654:80"          # visit http://localhost:8654
+    restart: unless-stopped

@@ -72,3 +72,33 @@ services:
     container_name: agents-plan
     ports: ["8653:80"]
     restart: unless-stopped
+  ft-plan:
+    build: ./ft-plan-app
+    image: ft-plan:latest
+    container_name: ft-plan
+    ports: ["8654:80"]
+    restart: unless-stopped
+  mlops-plan:
+    build: ./mlops-plan-app
+    image: mlops-plan:latest
+    container_name: mlops-plan
+    ports: ["8655:80"]
+    restart: unless-stopped
+  dataeng-plan:
+    build: ./dataeng-plan-app
+    image: dataeng-plan:latest
+    container_name: dataeng-plan
+    ports: ["8656:80"]
+    restart: unless-stopped
+  k8s-plan:
+    build: ./k8s-plan-app
+    image: k8s-plan:latest
+    container_name: k8s-plan
+    ports: ["8657:80"]
+    restart: unless-stopped
+  math-plan:
+    build: ./math-plan-app
+    image: math-plan:latest
+    container_name: math-plan
+    ports: ["8658:80"]
+    restart: unless-stopped
