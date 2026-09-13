@@ -44,6 +44,12 @@ const App = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-blue-900 text-white">
       <header className="bg-gray-800/80 backdrop-blur-sm border-b border-gray-700/50 sticky top-0 z-10 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full border border-gray-600 bg-gray-700/50 text-xs font-semibold uppercase tracking-wide text-gray-300 transition-colors hover:border-blue-500 hover:bg-blue-600/20 hover:text-blue-300"
+          >
+            ← <span>Back to Sprints</span>
+          </a>
           <div className="flex items-center gap-3 mb-4">
             <span className="text-4xl">📚</span>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">MyLearnings Books</h1>
