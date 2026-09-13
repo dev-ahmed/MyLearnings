@@ -11,3 +11,7 @@ stop = "python stop.py"
 
 # HTML launcher
 plans-launcher = "open plans-launcher.html"
+
+# Deploy
+deploy = "python3 deploy.py"
+deploy-check = "python3 deploy.py --verify"
