@@ -27,6 +27,19 @@ const EPUBViewer = ({ url }: EPUBViewerProps) => {
     };
   }, [url]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        rendition?.prev();
+      } else if (e.key === 'ArrowRight') {
+        rendition?.next();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [rendition]);
+
   const nextPage = () => rendition?.next();
   const prevPage = () => rendition?.prev();
 
