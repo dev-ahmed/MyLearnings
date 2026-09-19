@@ -84,25 +84,29 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
         }
       });
 
-      // Add right-click context menu
-      const iframeDoc = newRendition.getContents()[0]?.document;
-      if (iframeDoc) {
-        iframeDoc.addEventListener('contextmenu', (e: MouseEvent) => {
-          const selection = iframeDoc.getSelection();
-          const text = selection?.toString() || '';
+      // Add right-click context menu after content is rendered
+      newRendition.on('rendered', () => {
+        const contents = newRendition.getContents();
+        const iframeDoc = contents && contents.length > 0 ? (contents as any)[0]?.document : null;
 
-          if (text.trim()) {
-            e.preventDefault();
+        if (iframeDoc) {
+          iframeDoc.addEventListener('contextmenu', (e: MouseEvent) => {
+            const selection = iframeDoc.getSelection();
+            const text = selection?.toString() || '';
 
-            const iframeRect = (e.target as any).ownerDocument.defaultView.frameElement.getBoundingClientRect();
-            setContextMenuPos({
-              x: e.clientX + iframeRect.left,
-              y: e.clientY + iframeRect.top
-            });
-            setShowContextMenu(true);
-          }
-        });
-      }
+            if (text.trim()) {
+              e.preventDefault();
+
+              const iframeRect = (e.target as any).ownerDocument.defaultView.frameElement.getBoundingClientRect();
+              setContextMenuPos({
+                x: e.clientX + iframeRect.left,
+                y: e.clientY + iframeRect.top
+              });
+              setShowContextMenu(true);
+            }
+          });
+        }
+      });
 
       newRendition.on('relocated', (location: any) => {
         const percentage = Math.round((location.start.percentage || 0) * 100);
