@@ -87,7 +87,7 @@ def build() -> None:
 
 def stage(into: Path) -> Path:
     step("staging bundle")
-    for sub in ("hub/server", "www/plans", "www/books", "cookbooks"):
+    for sub in ("hub/server", "www/plans", "www/books", "cookbooks", "progress-api"):
         (into / sub).mkdir(parents=True, exist_ok=True)
 
     shutil.copytree(VIEWER / "dist", into / "www" / "books", dirs_exist_ok=True)
@@ -100,6 +100,10 @@ def stage(into: Path) -> Path:
         shutil.copy2(ROOT / "plans" / "sprints-metadata.json", into / "www" / "plans" / "sprints-metadata.json")
     shutil.copy2(HUB / "server" / "index.js", into / "hub" / "server" / "index.js")
     shutil.copytree(ROOT / "cookbooks", into / "cookbooks", dirs_exist_ok=True)
+
+    # Copy progress-api
+    for file in ["app.js", "server.js", "package.json"]:
+        shutil.copy2(ROOT / "progress-api" / file, into / "progress-api" / file)
 
     (into / "hub" / "package.json").write_text(
         '{\n  "name": "mylearnings-hub",\n  "private": true,\n  "type": "module",\n'
@@ -147,8 +151,13 @@ def upload(staged: Path, dry_run: bool) -> None:
 def restart() -> None:
     step("installing deps and restarting")
     ssh(f"cd {REMOTE}/hub && npm install --omit=dev --silent")
-    ssh(f"pm2 restart {PM2_APP} --update-env")
-    print(f"  {green('✓')} {PM2_APP} restarted")
+    ssh(f"cd {REMOTE}/progress-api && npm install --omit=dev --silent")
+    ssh(f"pm2 restart {PM2_APP} --update-env || true")
+
+    # Start or restart progress-api
+    ssh(f"cd {REMOTE}/progress-api && pm2 restart progress-api --update-env || pm2 start server.js --name progress-api")
+
+    print(f"  {green('✓')} {PM2_APP} and progress-api restarted")
 
 
 def _auth_header() -> dict[str, str]:
