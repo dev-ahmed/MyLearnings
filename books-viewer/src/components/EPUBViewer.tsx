@@ -86,25 +86,32 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
 
       // Add right-click context menu after content is rendered
       newRendition.on('rendered', () => {
-        const contents = newRendition.getContents();
-        const iframeDoc = contents && contents.length > 0 ? (contents as any)[0]?.document : null;
+        try {
+          const contents: any = newRendition.getContents();
+          const iframeDoc = contents && contents.length > 0 ? contents[0]?.document : null;
 
-        if (iframeDoc) {
-          iframeDoc.addEventListener('contextmenu', (e: MouseEvent) => {
-            const selection = iframeDoc.getSelection();
-            const text = selection?.toString() || '';
+          if (iframeDoc) {
+            iframeDoc.addEventListener('contextmenu', (e: MouseEvent) => {
+              const selection = iframeDoc.getSelection();
+              const text = selection?.toString() || '';
 
-            if (text.trim()) {
-              e.preventDefault();
+              if (text.trim()) {
+                e.preventDefault();
 
-              const iframeRect = (e.target as any).ownerDocument.defaultView.frameElement.getBoundingClientRect();
-              setContextMenuPos({
-                x: e.clientX + iframeRect.left,
-                y: e.clientY + iframeRect.top
-              });
-              setShowContextMenu(true);
-            }
-          });
+                const target: any = e.target;
+                const iframeRect = target?.ownerDocument?.defaultView?.frameElement?.getBoundingClientRect();
+                if (iframeRect) {
+                  setContextMenuPos({
+                    x: e.clientX + iframeRect.left,
+                    y: e.clientY + iframeRect.top
+                  });
+                  setShowContextMenu(true);
+                }
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Error setting up context menu:', err);
         }
       });
 
