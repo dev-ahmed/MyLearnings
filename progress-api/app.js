@@ -2,6 +2,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 function createApp(dbPath) {
   const app = express();
@@ -9,7 +10,13 @@ function createApp(dbPath) {
   app.use(cors());
   app.use(express.json());
 
-  const db = new sqlite3.Database(dbPath || path.join(__dirname, 'data', 'progress.db'));
+  const file = dbPath || path.join(__dirname, 'data', 'progress.db');
+
+  // sqlite will not create missing directories, so a plain file deploy (no
+  // Docker image to mkdir for us) crashes with SQLITE_CANTOPEN on first run.
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+
+  const db = new sqlite3.Database(file);
 
   db.serialize(() => {
     db.run(`
