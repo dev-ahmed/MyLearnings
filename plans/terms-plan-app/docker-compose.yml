@@ -1,0 +1,8 @@
+services:
+  terms-plan:
+    build: .
+    image: terms-plan:latest
+    container_name: terms-plan
+    ports:
+      - "8660:80"          # visit http://localhost:8660
+    restart: unless-stopped

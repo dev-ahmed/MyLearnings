@@ -108,3 +108,9 @@ services:
     container_name: freelancing-plan
     ports: ["8659:80"]
     restart: unless-stopped
+  terms-plan:
+    build: ./terms-plan-app
+    image: terms-plan:latest
+    container_name: terms-plan
+    ports: ["8660:80"]
+    restart: unless-stopped

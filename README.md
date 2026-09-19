@@ -1,12 +1,12 @@
 # MyLearnings
 
-Your backend-engineering learning library — nineteen cookbooks (PDF + EPUB),
-eighteen interactive study plans (as self-hosted Docker apps), a QR launcher, and
+Your backend-engineering learning library — twenty cookbooks (PDF + EPUB),
+nineteen interactive study plans (as self-hosted Docker apps), a QR launcher, and
 a tunnel tool to reach them from your phone. Framed for a developer fluent in
 Node.js/TypeScript moving into Python, PHP/Laravel, Rust, backend infrastructure,
 and the full AI/ML-engineering stack — the math foundation, data analysis, data
 engineering, machine learning, deep learning, reinforcement learning, RAG, agents,
-fine-tuning, MLOps, cloud/Kubernetes, and a career track on freelancing.
+fine-tuning, MLOps, cloud/Kubernetes, a career track on freelancing, and a technical-terms glossary.
 
 ```
 MyLearnings/
@@ -34,8 +34,10 @@ MyLearnings/
 │   │   └── data-engineering/        Data Engineering Cookbook
 │   ├── foundations/
 │   │   └── math-for-ml/             Math for Machine Learning Cookbook
-│   └── career/
-│       └── freelancing/             Freelancing Success Cookbook
+│   ├── career/
+│   │   └── freelancing/             Freelancing Success Cookbook
+│   └── reference/
+│       └── technical-terms/         Technical Terms Cookbook (glossary)
 ├── plans/                           # interactive trackers, each a Docker app
 │   ├── python-plan-app/             → http://localhost:8642
 │   ├── docker-plan-app/             → http://localhost:8643
@@ -55,6 +57,7 @@ MyLearnings/
 │   ├── k8s-plan-app/                → http://localhost:8657  (cloud & Kubernetes)
 │   ├── math-plan-app/               → http://localhost:8658  (math for ML)
 │   ├── freelancing-plan-app/        → http://localhost:8659  (freelancing success)
+│   ├── terms-plan-app/              → http://localhost:8660  (technical terms glossary)
 │   └── docker-compose.all.yml       # run ALL plans at once
 ├── tools/
 │   └── tunnel/                      tunnel.sh — reach the plans from your phone
@@ -88,6 +91,7 @@ MyLearnings/
 | MLOps | `ai-and-ml/mlops/` | MLOps Sprint | 8655 | 4 wks |
 | Cloud & Kubernetes | `infrastructure/cloud-kubernetes/` | Cloud & Kubernetes Sprint | 8657 | 4 wks |
 | Freelancing (career) | `career/freelancing/` | Freelancing Success Sprint | 8659 | 4 wks |
+| Technical Terms (glossary) | `reference/technical-terms/` | Technical Terms Sprint | 8660 | 3 wks |
 
 Redis, Queues, and Mailpit share one combined plan — the **Backend Infra Sprint**
 (8644) — because they're learned together as one async-backbone project.
@@ -119,7 +123,7 @@ cd plans
 docker compose -f docker-compose.all.yml up -d --build
 # Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648
 # n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653 · FineTuning 8654
-# MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658 · Freelancing 8659
+# MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658 · Freelancing 8659 · Terms 8660
 ```
 
 Stop everything with `docker compose -f docker-compose.all.yml down`.
@@ -180,6 +184,7 @@ The same trackers are also hosted (private to your account) as artifacts:
 - Cloud & Kubernetes Sprint — https://claude.ai/code/artifact/66f37d0b-f0ac-4ec8-9c80-14bfa8e26ab9
 - Math for ML Sprint — https://claude.ai/code/artifact/308d65c0-db6f-4801-a831-5b978c372ac0
 - Freelancing Success Sprint — https://claude.ai/code/artifact/d35ea5c1-4642-4d38-86f3-b9ca5465140b
+- Technical Terms Sprint — https://claude.ai/artifact/B6csB5evxwR8ChN565gWKq
 
 ## Reaching the plans from your phone
 
