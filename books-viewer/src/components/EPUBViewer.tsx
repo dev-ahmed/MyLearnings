@@ -31,6 +31,8 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
     };
 
     const setupBook = async () => {
+      if (!viewerRef.current) return;
+
       const newBook = ePub(url);
       const savedProgress = await loadProgress();
 
