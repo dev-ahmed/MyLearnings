@@ -1,0 +1,136 @@
+{
+  "sprints": [
+    {
+      "id": "python",
+      "name": "Python Backend Sprint",
+      "description": "Node.js → Python — Django and FastAPI",
+      "port": 8642,
+      "order": 1,
+      "prerequisites": [],
+      "difficulty": "intermediate",
+      "duration": "8 weeks",
+      "hours": 160,
+      "tags": ["backend", "python", "api", "fundamentals"]
+    },
+    {
+      "id": "rust",
+      "name": "Rust Systems Sprint",
+      "description": "Systems programming and performance",
+      "port": 8648,
+      "order": 2,
+      "prerequisites": ["python"],
+      "difficulty": "advanced",
+      "duration": "10 weeks",
+      "hours": 200,
+      "tags": ["systems", "rust", "performance"]
+    },
+    {
+      "id": "backend-infra",
+      "name": "Backend Infrastructure Sprint",
+      "description": "Queues, caching, observability",
+      "port": 8644,
+      "order": 3,
+      "prerequisites": ["python"],
+      "difficulty": "intermediate",
+      "duration": "6 weeks",
+      "hours": 120,
+      "tags": ["infrastructure", "devops", "backend"]
+    },
+    {
+      "id": "laravel",
+      "name": "Laravel Backend Sprint",
+      "description": "PHP framework mastery",
+      "port": 8645,
+      "order": 4,
+      "prerequisites": ["python"],
+      "difficulty": "intermediate",
+      "duration": "8 weeks",
+      "hours": 160,
+      "tags": ["backend", "php", "laravel"]
+    },
+    {
+      "id": "ml",
+      "name": "Machine Learning Sprint",
+      "description": "Classical ML and scikit-learn",
+      "port": 8647,
+      "order": 5,
+      "prerequisites": ["python"],
+      "difficulty": "intermediate",
+      "duration": "10 weeks",
+      "hours": 200,
+      "tags": ["ml", "ai", "python"]
+    },
+    {
+      "id": "dl",
+      "name": "Deep Learning Sprint",
+      "description": "Neural networks and PyTorch",
+      "port": 8652,
+      "order": 6,
+      "prerequisites": ["ml"],
+      "difficulty": "advanced",
+      "duration": "12 weeks",
+      "hours": 240,
+      "tags": ["dl", "ai", "neural-networks"]
+    },
+    {
+      "id": "rl",
+      "name": "Reinforcement Learning Sprint",
+      "description": "RL algorithms and agents",
+      "port": 8650,
+      "order": 7,
+      "prerequisites": ["ml", "dl"],
+      "difficulty": "advanced",
+      "duration": "10 weeks",
+      "hours": 200,
+      "tags": ["rl", "ai", "agents"]
+    },
+    {
+      "id": "da",
+      "name": "Data Analysis Sprint",
+      "description": "Pandas, visualization, statistics",
+      "port": 8651,
+      "order": 8,
+      "prerequisites": ["python"],
+      "difficulty": "intermediate",
+      "duration": "8 weeks",
+      "hours": 160,
+      "tags": ["data", "analysis", "visualization"]
+    },
+    {
+      "id": "agents",
+      "name": "AI Agents Sprint",
+      "description": "LLM agents and tool use",
+      "port": 8653,
+      "order": 9,
+      "prerequisites": ["ml", "dl"],
+      "difficulty": "advanced",
+      "duration": "8 weeks",
+      "hours": 160,
+      "tags": ["agents", "llm", "ai"]
+    },
+    {
+      "id": "rag",
+      "name": "RAG Systems Sprint",
+      "description": "Retrieval-augmented generation",
+      "port": 8646,
+      "order": 10,
+      "prerequisites": ["agents"],
+      "difficulty": "advanced",
+      "duration": "6 weeks",
+      "hours": 120,
+      "tags": ["rag", "llm", "ai"]
+    },
+    {
+      "id": "n8n",
+      "name": "N8N Workflow Sprint",
+      "description": "Workflow automation",
+      "port": 8649,
+      "order": 11,
+      "prerequisites": ["backend-infra"],
+      "difficulty": "beginner",
+      "duration": "4 weeks",
+      "hours": 80,
+      "tags": ["automation", "workflows", "integration"]
+    }
+  ]
+}

@@ -8,6 +8,8 @@ interface BookViewerProps {
 }
 
 const BookViewer = ({ book, onClose }: BookViewerProps) => {
+  const bookId = book.path.split('/').pop()?.replace(/\.(epub|pdf)$/, '') || book.title;
+
   return (
     <div className="fixed inset-0 bg-gray-900 z-50 flex flex-col">
       <div className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
@@ -23,7 +25,10 @@ const BookViewer = ({ book, onClose }: BookViewerProps) => {
         {book.format === 'pdf' ? (
           <PDFViewer url={`/books/api/books/file?path=${encodeURIComponent(book.path)}`} />
         ) : (
-          <EPUBViewer url={`/books/api/books/file?path=${encodeURIComponent(book.path)}`} />
+          <EPUBViewer
+            url={`/books/api/books/file?path=${encodeURIComponent(book.path)}`}
+            bookId={bookId}
+          />
         )}
       </div>
     </div>

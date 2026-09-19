@@ -1,4 +1,19 @@
 services:
+  progress-api:
+    build: ../progress-api
+    image: progress-api:latest
+    container_name: progress-api
+    ports:
+      - "8700:8700"
+    volumes:
+      - progress-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8700/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   mylearnings-hub:
     build:
       context: ..
@@ -10,9 +25,14 @@ services:
     volumes:
       - ../cookbooks:/app/cookbooks:ro
     restart: unless-stopped
+    depends_on:
+      - progress-api
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8000"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+volumes:
+  progress-data:

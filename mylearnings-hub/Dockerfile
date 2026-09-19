@@ -30,8 +30,14 @@ COPY --from=books-builder /app/dist /usr/share/nginx/html/books
 # Copy all plan HTML files
 COPY mylearnings-hub/plans /usr/share/nginx/html/plans
 
+# Copy sprint metadata
+COPY plans/sprints-metadata.json /usr/share/nginx/html/plans/sprints-metadata.json
+
 # Copy landing page
 COPY mylearnings-hub/index.html /usr/share/nginx/html/index.html
+
+# Copy favicon
+COPY mylearnings-hub/favicon.svg /usr/share/nginx/html/favicon.svg
 
 # Copy nginx configuration
 COPY mylearnings-hub/nginx.conf /etc/nginx/conf.d/default.conf

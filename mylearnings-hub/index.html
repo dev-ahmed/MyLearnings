@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>MyLearnings Hub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -133,6 +134,55 @@ h1 {
   color: var(--muted);
   font-size: 0.9rem;
 }
+
+.prereq-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.order-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.card {
+  position: relative;
+}
+
+.difficulty {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 4px;
+  display: block;
+}
+
+.section-title {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 3rem 0 1.5rem;
+  color: var(--ink);
+  text-align: center;
+}
 </style>
 </head>
 <body>
@@ -140,125 +190,52 @@ h1 {
   <h1>📚 MyLearnings Hub</h1>
   <p class="subtitle">Your complete learning platform - Sprint plans & technical cookbooks in one place</p>
 
-  <div class="grid">
-    <a href="/books/" class="card books-card">
-      <span class="card-icon">📚</span>
-      <h2 class="card-title">Books Library</h2>
-      <p class="card-desc">Browse and read technical cookbooks on Python, Laravel, Rust, ML, RAG, Redis, n8n and more</p>
-    </a>
+  <a href="/books/" class="card books-card" style="display: block; margin-bottom: 2rem;">
+    <span class="card-icon">📚</span>
+    <h2 class="card-title">Books Library</h2>
+    <p class="card-desc">Browse and read technical cookbooks on Python, Laravel, Rust, ML, RAG, Redis, n8n and more</p>
+  </a>
 
-    <a href="/plans/python" class="card">
-      <span class="card-icon">🐍</span>
-      <h2 class="card-title">Python Backend Sprint</h2>
-      <p class="card-desc">Django & FastAPI for Node developers</p>
-    </a>
-
-    <a href="/plans/docker" class="card">
-      <span class="card-icon">🐳</span>
-      <h2 class="card-title">Docker Deploy Sprint</h2>
-      <p class="card-desc">Containerization & deployment workflows</p>
-    </a>
-
-    <a href="/plans/backend-infra" class="card">
-      <span class="card-icon">🏗️</span>
-      <h2 class="card-title">Backend Infra Sprint</h2>
-      <p class="card-desc">Infrastructure & scaling patterns</p>
-    </a>
-
-    <a href="/plans/laravel" class="card">
-      <span class="card-icon">🔴</span>
-      <h2 class="card-title">Laravel Backend Sprint</h2>
-      <p class="card-desc">PHP Laravel for Node developers</p>
-    </a>
-
-    <a href="/plans/rag" class="card">
-      <span class="card-icon">🔍</span>
-      <h2 class="card-title">RAG Sprint</h2>
-      <p class="card-desc">Retrieval Augmented Generation systems</p>
-    </a>
-
-    <a href="/plans/ml" class="card">
-      <span class="card-icon">🤖</span>
-      <h2 class="card-title">Machine Learning Sprint</h2>
-      <p class="card-desc">Practical ML for production workflows</p>
-    </a>
-
-    <a href="/plans/rust" class="card">
-      <span class="card-icon">🦀</span>
-      <h2 class="card-title">Rust Sprint</h2>
-      <p class="card-desc">Rust for TypeScript developers</p>
-    </a>
-
-    <a href="/plans/n8n" class="card">
-      <span class="card-icon">⚡</span>
-      <h2 class="card-title">n8n Automation Sprint</h2>
-      <p class="card-desc">Workflow automation & integrations</p>
-    </a>
-
-    <a href="/plans/math" class="card">
-      <span class="card-icon">📐</span>
-      <h2 class="card-title">Math for ML Sprint</h2>
-      <p class="card-desc">Linear algebra, calculus & statistics foundations</p>
-    </a>
-
-    <a href="/plans/da" class="card">
-      <span class="card-icon">📊</span>
-      <h2 class="card-title">Data Analysis Sprint</h2>
-      <p class="card-desc">Pandas, exploration & visualization</p>
-    </a>
-
-    <a href="/plans/dataeng" class="card">
-      <span class="card-icon">🛢️</span>
-      <h2 class="card-title">Data Engineering Sprint</h2>
-      <p class="card-desc">Pipelines, warehousing & orchestration</p>
-    </a>
-
-    <a href="/plans/dl" class="card">
-      <span class="card-icon">🧠</span>
-      <h2 class="card-title">Deep Learning Sprint</h2>
-      <p class="card-desc">Neural networks with PyTorch</p>
-    </a>
-
-    <a href="/plans/rl" class="card">
-      <span class="card-icon">🎮</span>
-      <h2 class="card-title">Reinforcement Learning Sprint</h2>
-      <p class="card-desc">Agents, rewards & policy learning</p>
-    </a>
-
-    <a href="/plans/agents" class="card">
-      <span class="card-icon">🤖</span>
-      <h2 class="card-title">AI Agents Sprint</h2>
-      <p class="card-desc">Tool use, planning & multi-agent systems</p>
-    </a>
-
-    <a href="/plans/ft" class="card">
-      <span class="card-icon">🎛️</span>
-      <h2 class="card-title">Fine-Tuning Sprint</h2>
-      <p class="card-desc">LoRA, QLoRA & DPO for custom models</p>
-    </a>
-
-    <a href="/plans/mlops" class="card">
-      <span class="card-icon">⚙️</span>
-      <h2 class="card-title">MLOps Sprint</h2>
-      <p class="card-desc">Serving, monitoring & model lifecycle</p>
-    </a>
-
-    <a href="/plans/k8s" class="card">
-      <span class="card-icon">☸️</span>
-      <h2 class="card-title">Cloud &amp; Kubernetes Sprint</h2>
-      <p class="card-desc">Deploying ML workloads at scale</p>
-    </a>
-
-    <a href="/plans/freelancing" class="card">
-      <span class="card-icon">💼</span>
-      <h2 class="card-title">Freelancing Success Sprint</h2>
-      <p class="card-desc">Finding clients, pricing & running the business</p>
-    </a>
-  </div>
+  <h3 class="section-title">📍 Learning Path (in suggested order)</h3>
+  <div class="grid" id="sprintsGrid"></div>
 
   <div class="footer">
     <p>🤖 MyLearnings Hub · All plans and books in one unified container</p>
   </div>
 </div>
+
+<script>
+const SPRINT_ICONS = {
+  python: '🐍', rust: '🦀', 'backend-infra': '🏗️', laravel: '🔴',
+  ml: '🤖', dl: '🧠', rl: '🎮', da: '📊', agents: '🤖', rag: '🔍', n8n: '⚡'
+};
+
+fetch('/plans/sprints-metadata.json')
+  .then(res => res.json())
+  .then(data => {
+    const sprints = data.sprints.sort((a, b) => a.order - b.order);
+    const grid = document.getElementById('sprintsGrid');
+
+    sprints.forEach(sprint => {
+      const prereqText = sprint.prerequisites.length > 0
+        ? `<span class="prereq-badge">Requires: ${sprint.prerequisites.join(', ')}</span>`
+        : '';
+
+      const card = document.createElement('a');
+      card.href = `/plans/${sprint.id}`;
+      card.className = 'card';
+      card.innerHTML = `
+        <span class="order-badge">${sprint.order}</span>
+        <span class="card-icon">${SPRINT_ICONS[sprint.id] || '📖'}</span>
+        <h2 class="card-title">${sprint.name}</h2>
+        <p class="card-desc">${sprint.description}</p>
+        <span class="difficulty">${sprint.difficulty.toUpperCase()} · ${sprint.duration} · ~${sprint.hours}hrs</span>
+        ${prereqText}
+      `;
+      grid.appendChild(card);
+    });
+  })
+  .catch(err => console.error('Failed to load sprint metadata', err));
+</script>
 </body>
 </html>

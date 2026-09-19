@@ -1,5 +1,13 @@
 # Run ALL plan trackers at once:  docker compose -f docker-compose.all.yml up -d --build
 services:
+  progress-api:
+    build: ../progress-api
+    image: progress-api:latest
+    container_name: progress-api
+    ports: ["8700:8700"]
+    volumes:
+      - progress-data:/app/data
+    restart: unless-stopped
   python-plan:
     build: ./python-plan-app
     image: python-plan:latest
@@ -114,3 +122,6 @@ services:
     container_name: terms-plan
     ports: ["8660:80"]
     restart: unless-stopped
+
+volumes:
+  progress-data:
