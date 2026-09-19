@@ -17,10 +17,16 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.por
   ? 'http://localhost:8700/api/progress'
   : '/api/progress';
 
+const LOCATION_CHARS = 1024;
+const LOCATIONS_PLAN = 'books-locations';
+
 const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
   const viewerRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<any>(null);
   const [rendition, setRendition] = useState<any>(null);
   const [progress, setProgress] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
@@ -48,6 +54,7 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
       if (!viewerRef.current) return;
 
       const newBook = ePub(url);
+      bookRef.current = newBook;
       const savedProgress = await loadProgress();
       const savedAnnotations = await loadAnnotations();
 
@@ -118,8 +125,19 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
       newRendition.on('relocated', (location: any) => {
         const percentage = Math.round((location.start.percentage || 0) * 100);
         setProgress(percentage);
+        setPage(pageFromCfi(newBook, location.start.cfi, location));
 
         saveProgress(location.start.cfi, percentage);
+      });
+
+      // Locations power whole-book page numbers. Generating them parses every
+      // section, so do it after the first paint and cache it per book.
+      buildLocations(newBook, bookId).then((total) => {
+        setTotalPages(total);
+        const current: any = newRendition.currentLocation();
+        if (current?.start?.cfi) {
+          setPage(pageFromCfi(newBook, current.start.cfi, current));
+        }
       });
     };
 
@@ -129,6 +147,61 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
       rendition?.destroy();
     };
   }, [url, bookId]);
+
+  // Locations are cached in sqlite, not the browser, so the page numbering is
+  // identical on every machine instead of being rebuilt per browser profile.
+  const buildLocations = async (book: any, id?: string): Promise<number> => {
+    try {
+      const res = await fetch(`${API_BASE}/${LOCATIONS_PLAN}`);
+      const rows = await res.json();
+      const cached = rows.find((r: any) => r.item_text === id)?.annotations;
+      if (cached) {
+        book.locations.load(cached);
+        return book.locations.total || 0;
+      }
+    } catch (e) {
+      console.error('Failed to load cached locations', e);
+    }
+
+    try {
+      await book.ready;
+      await book.locations.generate(LOCATION_CHARS);
+      const total = book.locations.total || 0;
+      if (id) saveLocations(id, book.locations.save());
+      return total;
+    } catch (e) {
+      console.error('Failed to generate locations', e);
+      return 0;
+    }
+  };
+
+  const saveLocations = async (id: string, payload: string) => {
+    try {
+      await fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planName: LOCATIONS_PLAN,
+          itemText: id,
+          annotations: payload,
+          completed: false
+        })
+      });
+    } catch (e) {
+      console.error('Failed to cache locations', e);
+    }
+  };
+
+  const pageFromCfi = (book: any, cfi: string, location: any): number => {
+    try {
+      const index = book.locations?.locationFromCfi(cfi);
+      if (typeof index === 'number' && index >= 0) return index + 1;
+    } catch (e) {
+      console.error('Failed to resolve page', e);
+    }
+    // Before locations finish generating, fall back to the page within the section.
+    return location?.start?.displayed?.page || 0;
+  };
 
   const saveProgress = async (cfi: string, percentage: number) => {
     if (!bookId) return;
@@ -280,11 +353,15 @@ const EPUBViewer = ({ url, bookId }: EPUBViewerProps) => {
         >
           ← Previous
         </button>
-        {progress > 0 && (
-          <div className="text-white text-sm font-mono">
-            Progress: {progress}% · {annotations.length} notes
-          </div>
-        )}
+        <div className="text-white text-sm font-mono">
+          {page > 0 && (
+            <span>
+              Page {page}
+              {totalPages > 0 ? ` of ${totalPages}` : ''} ·{' '}
+            </span>
+          )}
+          {progress}% · {annotations.length} notes
+        </div>
         <button
           onClick={nextPage}
           className="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors font-medium"

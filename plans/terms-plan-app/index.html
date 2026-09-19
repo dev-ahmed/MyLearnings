@@ -138,8 +138,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Foundations: programming, backend & data", "goal": "Own the everyday vocabulary under everything else.", "read": [["Parts 1–3", "General/CS · backend & web · data"]], "readTasks": ["Skim Part 1 (general programming & CS) and Part 2 (backend & web)", "Skim Part 3 (data — analysis & engineering)"], "build": ["Pick 15 terms you couldn't confidently define and write each in your own words", "Explain 'API', 'idempotent', 'ORM', and 'ETL vs ELT' to a rubber duck (or a friend) from memory", "Star every term you *thought* you knew but couldn't actually define — those are the real gaps", "Next time you read the Python/Backend/Data tracks, look terms up here as you hit them"], "outcome": "The backend and data vocabulary no longer trips you up."}, {"n": "WEEK 02", "title": "Machine learning & deep learning", "goal": "Demystify the ML/DL words so the ML books read easily.", "read": [["Parts 4–5", "Machine learning · deep learning"]], "readTasks": ["Read Part 4 (machine learning) and Part 5 (deep learning)", "Connect each term to where it appears in the ML/DL cookbooks"], "build": ["Define the learning trio: supervised vs unsupervised vs reinforcement — in one line each", "Explain 'overfitting', 'gradient descent', 'loss', and 'embedding' in plain words", "Distinguish precision vs recall with a one-sentence example", "Note which terms you want to go deep on, and open the ML or Deep Learning book there"], "outcome": "ML and deep-learning jargon reads as plain ideas."}, {"n": "WEEK 03", "title": "LLMs, agents, MLOps, cloud & business", "goal": "Cover the modern-AI and shipping/business vocabulary.", "read": [["Parts 6–10", "LLMs · agents & MCP · MLOps & cloud · freelancing · acronyms"]], "readTasks": ["Read Part 6 (LLMs) and Part 7 (agents & automation, incl. MCP)", "Skim Part 8 (MLOps & cloud), Part 9 (freelancing), and Part 10 (acronym quick-expand)"], "build": ["Explain 'RAG', 'fine-tuning', 'token', and 'context window' in one line each", "Define 'agent', 'tool calling', and 'MCP' — and how they relate", "Cover the shipping words: 'container', 'Kubernetes pod', 'drift', 'CI/CD'", "Skim the acronym table until the common ones (RAG, MCP, SFT, HPA, ETL, JSS) are instant"], "outcome": "You can read anything in the library without a jargon wall."}];
 const FINAL = ["Core CS: algorithm, data structure, function, class, Big-O", "Runtime: concurrency, async, latency, throughput, idempotent", "Backend: API, REST, CRUD, endpoint, webhook", "Data stores: SQL/NoSQL, ORM, index, transaction, queue", "Infra basics: container, image, environment, observability", "Data analysis: DataFrame, EDA, distribution, correlation, p-value", "Data engineering: ETL/ELT, warehouse, Parquet, DAG, dbt", "ML core: model, feature, label, training, inference", "ML types: supervised, unsupervised, reinforcement", "ML eval: overfitting, precision/recall, cross-validation, leakage", "Deep learning: tensor, gradient, backprop, epoch, optimizer", "Architectures: CNN, transformer, attention, transfer learning", "LLMs: token, prompt, context window, temperature, hallucination", "LLM customizing: RAG, fine-tuning, LoRA/QLoRA, SFT, DPO, quantization", "Agents: agent loop, tool calling, memory, guardrails, prompt injection", "MCP: server, client, tools/resources/prompts, transport", "MLOps: tracking, registry, drift, serving, CI/CD", "Cloud/k8s: pod, deployment, service, ingress, HPA, Helm, IaC", "Freelancing: niche, proposal, scope creep, retainer, JSS, escrow", "Acronyms: expand RAG, MCP, SFT, ETL, HPA, IaC, JSS on sight"];
 const KEY = "terms-sprint-v1"; const THEME_KEY = "terms-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Technical-Terms-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -178,9 +233,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -191,4 +247,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

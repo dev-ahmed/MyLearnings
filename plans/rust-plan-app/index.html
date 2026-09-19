@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Familiar ground", "goal": "Write typed Rust that looks like the TypeScript you know.", "read": [["Parts 1–2, 5, 7", "Tooling → traits"]], "readTasks": ["Read Part 1 (cargo) and Part 2 (basics, immutability, expressions)", "Read Part 5 (structs, enums, match) and Part 7 (traits & generics)"], "build": ["Install rustup; cargo new a project; run cargo run/fmt/clippy/test", "Port ~20 small TS functions to Rust; hit the trailing-semicolon error once", "Model a domain with a struct + an enum + a match (add a variant, fix the match)", "Define a trait, impl it for two structs, and #[derive(Debug, Clone, PartialEq)]"], "outcome": "Comfortable with the syntax, structs/enums, match, and traits."}, {"n": "WEEK 02", "title": "The new model: ownership", "goal": "Read and fix borrow-checker errors by adjusting ownership, not cloning.", "read": [["Parts 3–4, 9", "Ownership → strings"]], "readTasks": ["Read Part 3 (ownership & borrowing) — the crux; do it slowly", "Read Part 4 (lifetimes) and Part 9 (String vs &str)"], "build": ["Trigger a 'moved value' error; fix it two ways (borrow with &, and .clone())", "Write functions taking &T and &mut T; keep ownership in the caller", "Trigger the borrow-checker's reader+writer conflict and resolve it", "Take &str parameters, return String; print byte-length vs char-count of an emoji string"], "outcome": "You understand moves, borrows, lifetimes — the heart of Rust."}, {"n": "WEEK 03", "title": "Idiomatic Rust", "goal": "Handle errors and transform data the Rusty way; use the ecosystem.", "read": [["Parts 6, 8, 10", "Errors / iterators / crates"]], "readTasks": ["Read Part 6 (Option, Result, ?) and Part 8 (collections & iterators)", "Read Part 10 (modules, crates, serde)"], "build": ["Rewrite a fallible function with Result + ? (no unwrap on the happy path)", "Port a filter().map().slice() chain to an iterator chain ending in collect()", "Build a HashMap word-count with entry().or_insert()", "Split code into a module; add serde and round-trip a struct to JSON and back"], "outcome": "Idiomatic error handling, iterators, modules, and serde."}, {"n": "WEEK 04", "title": "Real programs", "goal": "Ship a small Rust binary and service end to end.", "read": [["Parts 11–12", "Concurrency/async → building"]], "readTasks": ["Read Part 11 (threads, Arc/Mutex, async/await, tokio)", "Read Part 12 (testing, clap CLI, axum service)"], "build": ["Spawn threads and share a counter with Arc<Mutex<i32>>; run two async fns with tokio::join!", "Build a clap CLI (name + count) with a unit test for its core function", "Build an axum service: GET /health + POST /echo (typed JSON via serde) with a tests/ integration test", "Containerize the binary (a tiny distroless image) and run it"], "outcome": "A CLI and an async web service in Rust — you can ship it."}];
 const FINAL = ["Use cargo: run, test, fmt, clippy, add", "Write immutable-by-default, expression-oriented code", "Explain ownership, moves, and borrowing", "Fix borrow errors without reflexive cloning", "Use lifetimes (or own data to avoid them)", "Model domains with structs, enums, and match", "Handle errors with Option, Result, and ?", "Define traits and write generic code with bounds", "Transform data with iterator chains + collect", "Use &str vs String correctly", "Organize code with modules; use serde", "Thread + share state with Arc<Mutex<>>", "Write async fns and run them on tokio", "Build a CLI (clap) and a service (axum) with tests"];
 const KEY = "rust-sprint-v1"; const THEME_KEY = "rust-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Rust-for-TypeScript-Developers";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

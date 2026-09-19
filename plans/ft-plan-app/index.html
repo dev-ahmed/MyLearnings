@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "The decision, the map & the data", "goal": "Decide whether to fine-tune at all, and build the dataset that decides the outcome.", "read": [["Parts 1–3", "When to fine-tune · landscape · data prep"]], "readTasks": ["Read Part 1 (fine-tune vs prompt vs RAG — the decision) and Part 2 (full/PEFT/LoRA/QLoRA, SFT vs preference)", "Read Part 3 (data prep — the dataset is the product)"], "build": ["Take three 'model isn't doing what I want' problems; classify each as knowledge (RAG) or behaviour (fine-tune) and pick the cheapest lever", "Map your intended fine-tune onto both axes (full vs PEFT, SFT vs preference) — justify why not just QLoRA+SFT", "Curate a 100–300 example SFT dataset in chat format with ONE strict target format; split train/val/test", "Hand-review 20 random examples and fix every inconsistency; then corrupt 20% on purpose to feel how the data becomes the behaviour"], "outcome": "You can tell when to fine-tune and have a clean, split dataset."}, {"n": "WEEK 02", "title": "SFT with QLoRA", "goal": "Fine-tune a small open model on one GPU and know the knobs.", "read": [["Parts 4–5", "Supervised fine-tuning · LoRA/QLoRA"]], "readTasks": ["Read Part 4 (SFT mechanics with TRL, epochs/LR, watch loss but trust eval)", "Read Part 5 (LoRA, QLoRA, the r rank, adapters are swappable)"], "build": ["Set up an SFT run with TRL; do the tiny-subset overfit test first (10–20 examples)", "Convert it to QLoRA: 4-bit base + LoraConfig (r=16), LoRA-appropriate LR; confirm it fits your GPU", "Train 1–3 epochs; watch train/val loss and generate on held-out inputs; print trainable-parameter % (<1%)", "Deliberately train 10 epochs and watch the model memorise and degrade — overfitting in an LLM; save the tiny adapter and note its MB size"], "outcome": "A QLoRA-fine-tuned model and a real feel for the knobs."}, {"n": "WEEK 03", "title": "Preference, evaluate & serve", "goal": "Polish with DPO if needed, prove it beats the baseline, and serve it.", "read": [["Parts 6–10", "DPO · evaluation · serving · production · capstone"]], "readTasks": ["Read Part 6 (DPO/RLHF, SFT-then-DPO order) and Part 7 (evaluate vs base+prompt, regression check)", "Read Parts 8–10 (serving adapters/vLLM, production/cost/versioning; capstone + cheat sheet)"], "build": ["Build a small preference set (~50 prompts, chosen vs rejected) and run DPO with LoRA on top of the SFT adapter", "Build an eval harness: held-out task score + a 10-prompt general-ability regression check; score base+prompt vs SFT vs (RAG) in a table", "Serve the adapter behind an OpenAI-compatible endpoint (vLLM/Ollama); confirm your LLM client works by changing only base_url; try merged vs base+adapter", "Capstone: one task from decision → data → QLoRA SFT → eval vs baseline → served, and decide honestly whether the fine-tune beat the prompt"], "outcome": "An evaluated, served fine-tune — and the judgement to know if it was worth it."}];
 const FINAL = ["Choose prompt vs RAG vs fine-tune by knowledge-vs-behaviour", "Explain full vs PEFT vs LoRA vs QLoRA", "Explain SFT vs preference tuning (DPO/RLHF)", "Curate a clean, consistent chat-format dataset", "Split train/val/test and avoid leakage", "Run SFT with TRL; do the tiny-subset overfit test", "Fine-tune with QLoRA on a single GPU (r, LR, epochs)", "Avoid catastrophic forgetting and over-training", "Run DPO on preference pairs after SFT (only if needed)", "Evaluate against base + best prompt on a held-out set", "Add a general-ability regression check", "Serve base+adapter or merged via an OpenAI-compatible API", "Pin the exact base model + chat template for serving", "Version data/config/adapter; re-baseline as models improve"];
 const KEY = "ft-sprint-v1"; const THEME_KEY = "ft-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Fine-Tuning-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

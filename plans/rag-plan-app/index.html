@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Foundations: pipeline → vector store", "goal": "Ingest a corpus into a searchable vector index you understand.", "read": [["Parts 1–4", "Pipeline → vector DBs"]], "readTasks": ["Read Parts 1–2 (the pipeline, embeddings)", "Read Parts 3–4 (chunking, vector databases)"], "build": ["Build the 15-line skeleton with stubs so the control flow is real", "Chunk a structured doc three ways (fixed, overlap, heading-aware); embed + compare", "Stand up pgvector (or Chroma); upsert chunks with metadata", "Run a top-k search with a metadata filter; delete a doc and re-query"], "outcome": "A corpus ingested, embedded, and searchable — with metadata filters."}, {"n": "WEEK 02", "title": "Retrieval quality: hybrid, rerank, ground", "goal": "Turn similarity search into answers you'd trust.", "read": [["Parts 5–7", "Retrieval / hybrid+rerank / generation"]], "readTasks": ["Read Part 5 (retrieval, k, metadata filters, MMR)", "Read Parts 6–7 (hybrid search + reranking, grounded generation)"], "build": ["Add BM25 and fuse with RRF; measure exact-term queries improving", "Add a cross-encoder reranker over the top-50 → best 4", "Build the grounded prompt: use-only-context, citations, 'I don't know'", "Trigger a hallucination, then fix it with the grounding instruction"], "outcome": "A retrieve→rerank→ground pipeline that answers with citations."}, {"n": "WEEK 03", "title": "Evaluation, production & the RAG API", "goal": "Measure it, serve it, and make it safe and fast.", "read": [["Parts 8–12", "Eval → API → cheat sheet"]], "readTasks": ["Read Part 8 (evaluation) and Parts 9 (advanced patterns)", "Read Parts 10–12 (production, the RAG API, pitfalls)"], "build": ["Build a golden set (20–50 Qs) + a harness for recall@k and faithfulness; run it in CI", "Make ingestion a queue job: incremental, idempotent, delete-then-insert", "Build the FastAPI /query endpoint: retrieve→rerank→ground→stream, tenant-filtered, cached", "Plant a prompt-injection doc and confirm your guardrails hold"], "outcome": "A measured, secure, deployable RAG service — not a demo."}];
 const FINAL = ["Structure-aware, metadata-rich chunking", "Same pinned embedding model for docs + queries; cached", "Retrieval filtered by tenant/permissions + version", "Hybrid search (dense + BM25) + a reranker", "Grounded prompt: use-only-context, cite, 'I don't know'", "Golden set: recall@k + faithfulness, in CI", "Debug retrieval before generation", "Queue-backed, incremental, idempotent ingestion", "Answers/embeddings cached; timeouts + rate limits", "Retrieved chunks treated as untrusted (injection-aware)", "Per-query logging of chunks + answer; feedback → eval", "Pick vector store for your scale (pgvector/Redis first)"];
 const KEY = "rag-sprint-v1"; const THEME_KEY = "rag-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "RAG-Backend-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

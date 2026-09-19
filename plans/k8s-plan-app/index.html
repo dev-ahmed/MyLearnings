@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Decide & the core objects", "goal": "Judge if you need k8s, then run a self-healing app on it.", "read": [["Parts 1–2", "When (not) to use k8s · pods/deployments/services"]], "readTasks": ["Read Part 1 (the deployment ladder; when a PaaS/managed endpoint beats k8s)", "Read Part 2 (pods, deployments, services)"], "build": ["For three workloads, pick the lowest rung that runs each (PaaS / managed endpoint / managed k8s / self-managed)", "Spin up a local cluster (kind/minikube/k3s)", "Deploy a containerized app via a Deployment (3 replicas, resource requests/limits) + a Service", "Delete a pod and watch it self-heal; scale to 5 by editing YAML and re-applying"], "outcome": "A self-healing, load-balanced app on a local cluster."}, {"n": "WEEK 02", "title": "Config & networking", "goal": "Externalize config, add health probes, and route traffic.", "read": [["Parts 3–4", "Config/secrets/probes · services & ingress"]], "readTasks": ["Read Part 3 (ConfigMaps, Secrets, liveness/readiness/startup probes)", "Read Part 4 (service types, Ingress, TLS)"], "build": ["Move a deployment's config to a ConfigMap and secrets to a Secret, injected as env — rebuild nothing", "Add readiness + liveness probes on /health; simulate a slow model load and fix the restart loop with a startup probe", "Install an ingress controller; route /app and /models to two services through one entry point", "Add local TLS and confirm HTTPS terminates at the ingress"], "outcome": "Config-driven, health-checked, ingress-routed services."}, {"n": "WEEK 03", "title": "Scaling & GPUs", "goal": "Autoscale pods and nodes; run GPUs without burning money.", "read": [["Parts 5–6", "Autoscaling · GPUs on k8s"]], "readTasks": ["Read Part 5 (HPA, cluster autoscaler, horizontal vs vertical)", "Read Part 6 (requesting GPUs, scale-to-zero pools, spot, cost)"], "build": ["Add an HPA (CPU 70%, min 2, max 10); load-test and watch replicas scale up then down", "(Cloud) enable the cluster autoscaler and drive load until nodes are added, then removed when idle", "(Cloud) add a scale-to-zero GPU node pool; run a training Job requesting 1 GPU and watch a node appear then vanish", "Compare your GPU setup's monthly cost to a managed inference endpoint for the same workload"], "outcome": "Two-layer autoscaling and cost-aware GPU usage."}, {"n": "WEEK 04", "title": "Serve models, IaC & ops", "goal": "Serve a model on k8s, package it, and operate it affordably.", "read": [["Parts 7–10", "Model serving · Helm/Terraform · cost & ops · capstone"]], "readTasks": ["Read Part 7 (serving models the plain way vs KServe/Triton) and Part 8 (Helm, Terraform, GitOps)", "Read Part 9 (cost & operations) and Part 10 (capstone + cheat sheet)"], "build": ["Deploy a registered model (MLOps book) the plain way: Deployment (startup probe) + Service + Ingress + HPA; load-test", "Package it as a Helm chart with dev/prod values; practice helm upgrade and rollback", "Stand up Prometheus + Grafana; dashboard node utilization + app latency; add a restart-loop alert and maxReplicas caps", "Capstone: take a containerized model to a scalable, monitored k8s service end to end"], "outcome": "A packaged, monitored, cost-capped model service on k8s."}];
 const FINAL = ["Choose the right rung (PaaS / managed endpoint / k8s)", "Explain pods, deployments, and services", "Deploy a self-healing app and scale it", "Set resource requests and limits", "Externalize config with ConfigMaps and Secrets", "Use readiness, liveness, and startup probes correctly", "Route HTTP with a single Ingress + TLS", "Autoscale pods (HPA) and nodes (cluster autoscaler) with caps", "Request and cost-manage GPUs (scale-to-zero, spot)", "Serve a model on k8s (plain, or KServe/Triton when justified)", "Package workloads as Helm charts (upgrade + rollback)", "Define cloud infra with Terraform", "Monitor with Prometheus/Grafana and alert", "Control cost: right-size, scale-to-zero, cap the max"];
 const KEY = "k8s-sprint-v1"; const THEME_KEY = "k8s-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Cloud-and-Kubernetes-for-ML-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>
