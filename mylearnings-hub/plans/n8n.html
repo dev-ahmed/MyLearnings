@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Nodes, triggers & your first flows", "goal": "Stand up n8n and build trigger→action workflows with no code.", "read": [["n8n Docs: Quickstart & core concepts", "Canvas · nodes · executions"]], "readTasks": ["Read the Quickstart and 'Core concepts' — nodes, connections, and executions", "Skim the Editor UI overview and the list of Trigger nodes"], "build": ["Run n8n locally in Docker: docker run -it --rm -p 5678:5678 n8nio/n8n; open http://localhost:5678", "Build a Manual Trigger → Edit Fields (Set) → NoOp flow; execute it and read the item data on each node", "Build a Schedule Trigger that fires every minute and outputs a timestamp", "Build a Webhook trigger; POST JSON to its test URL with curl and inspect the payload (your Express route, but visual)", "Duplicate a flow, rename nodes, and pin sample data so you can iterate without re-running upstream"], "outcome": "n8n running locally; you can build and execute trigger→action workflows."}, {"n": "WEEK 02", "title": "Real automations: data, HTTP & the Code node", "goal": "Move and transform real data between services; drop into JS only when nodes fall short.", "read": [["n8n Docs: Data structure, Expressions, HTTP Request, Code node", "+ Queues cookbook for contrast"]], "readTasks": ["Read 'Data structure' (items & JSON), Expressions (the {{ }} syntax), and the HTTP Request node", "Read the Code node docs, plus Error handling and the Error Trigger"], "build": ["Call a public REST API with the HTTP Request node; map fields into a clean shape with Set + expressions", "Use a Code node (JavaScript) to reshape items — the escape hatch for what nodes can't express", "Add Credentials for an API and reference a secret from a node (never hard-code a key)", "Add error handling: an IF branch on a failure condition, plus an Error Trigger workflow that notifies you", "Wire two systems end-to-end: webhook → transform → write to a database / Google Sheet / Slack", "Compare: sketch how you'd write this same automation by hand with Express + BullMQ (your Queues book) and note what n8n saved"], "outcome": "You can connect APIs, transform data, manage secrets, and handle failures."}, {"n": "WEEK 03", "title": "AI workflows & real self-hosting", "goal": "Build an AI workflow, then run n8n as a persistent, scalable, secured service.", "read": [["n8n Docs: Advanced AI (LangChain) + Hosting & Queue mode", "+ RAG & LLM cookbooks"]], "readTasks": ["Read the Advanced AI nodes: Basic LLM Chain, AI Agent, and Vector Store nodes", "Read Hosting n8n: environment variables, data persistence, and queue mode (workers)"], "build": ["Build an AI Agent workflow: a chat/LLM node given one tool (an HTTP call or a sub-workflow) it can invoke", "Build a mini-RAG flow: load docs → embeddings → a vector store node → retrieve + answer (ties straight to your RAG book)", "Move to a persistent setup: a docker-compose with Postgres for n8n's own data + a named volume, so workflows survive restarts", "Enable queue mode with a Redis-backed worker; run a heavy workflow and watch it execute on the worker, not the main process", "Secure it: set N8N_ENCRYPTION_KEY, enable the owner account/auth, note HTTPS via a reverse proxy — then write your own 'when NOT to use n8n' list"], "outcome": "An AI workflow plus a persistent, queue-mode, secured n8n you can rely on."}];
 const FINAL = ["Run n8n locally in Docker and open the editor", "Explain nodes, connections, items, and executions", "Use Manual, Schedule, and Webhook triggers", "Read and write workflow data with expressions ({{ }})", "Call any API with the HTTP Request node", "Drop into the Code node (JavaScript) when nodes fall short", "Store secrets as Credentials, never hard-coded", "Handle failures with IF branches and an Error Trigger", "Connect two or more systems end-to-end", "Build an AI Agent workflow that calls a tool", "Build a retrieval (RAG) workflow with a vector store", "Persist n8n's own data with Postgres + a volume", "Scale with queue mode (Redis + workers)", "Secure it: encryption key, auth, HTTPS via a proxy", "Judge when NOT to use n8n (vs code + BullMQ)"];
 const KEY = "n8n-sprint-v1"; const THEME_KEY = "n8n-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "n8n-Automation-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "The PHP language & functional PHP", "goal": "Read and write modern, typed PHP without translating in your head.", "read": [["Parts 1–2", "Language / functional"]], "readTasks": ["Read Part 1 (syntax, types, arrays, classes, enums, traits, generics)", "Read Part 2 (functional PHP + Laravel Collections)"], "build": ["Set up PHP 8.3 + Composer; run <span class='mono'>declare(strict_types=1)</span> + Larastan green", "Port ~15 Node utilities to PHP; note array-is-both-list-and-map", "Rewrite a data transform with <span class='mono'>collect()->map()->filter()->reduce()</span>", "Model a <span class='mono'>Money</span> value object + a backed enum"], "outcome": "Idiomatic, type-checked PHP and fluent Collection pipelines."}, {"n": "WEEK 02", "title": "Runtime, Composer & Laravel architecture", "goal": "Understand the shared-nothing runtime and how Laravel is wired.", "read": [["Parts 3–5", "Runtime / Composer / architecture"]], "readTasks": ["Read Part 3 (Node event loop vs PHP-FPM/Octane) and Part 4 (Composer)", "Read Part 5 (container, providers, facades, middleware)"], "build": ["Scaffold a Laravel app; wire a route → controller → middleware", "Bind a contract to an implementation in a service provider; inject by type-hint", "Explain shared-nothing vs the Node event loop in two sentences", "Add a timing middleware and confirm it runs on the way out"], "outcome": "A routed app with DI, and a correct model of where work runs."}, {"n": "WEEK 03", "title": "Routing, Eloquent & CRUD", "goal": "Build a full relational CRUD feature with zero N+1s.", "read": [["Parts 6–8", "Routing / Eloquent / CRUD"]], "readTasks": ["Read Part 6 (routing, route model binding, apiResource) and Part 7 (Eloquent vs Prisma)", "Read Part 8 (the anatomy of a CRUD feature)"], "build": ["Model Users → Projects → Tasks with migrations, relations, casts, factories", "Build the full CRUD: Form Request, Resource, --api controller", "Eager-load to kill an N+1; prove it with the query count", "Turn on <span class='mono'>preventLazyLoading</span> in dev"], "outcome": "A relational data layer and clean CRUD with no N+1 queries."}, {"n": "WEEK 04", "title": "REST APIs, auth & security", "goal": "An API safe to expose publicly.", "read": [["Parts 9–11", "REST / auth / security"]], "readTasks": ["Read Part 9 (pagination, filtering, error envelopes, idempotency) and Part 10 (Sanctum, policies)", "Read Part 11 (the security checklist)"], "build": ["Add pagination, allow-listed filtering/sorting, a central JSON error handler", "Add Sanctum tokens + a ProjectPolicy (owner-only edit → 403)", "Add rate limiting; confirm mass-assignment and injection are closed", "Add an idempotency key to an unsafe POST"], "outcome": "A production-shaped, authenticated, hardened JSON API."}, {"n": "WEEK 05", "title": "Architecture, queues, cache, HTTP, files, testing", "goal": "Offload slow work and cover the app with tests.", "read": [["Parts 12–18", "Architecture → testing"]], "readTasks": ["Read Parts 12–15 (architecture, queues, scheduling, cache)", "Read Parts 16–18 (HTTP client, files/S3, Pest testing)"], "build": ["Move email + an external sync to idempotent queued jobs (Redis)", "Cache a hot endpoint with stampede protection; add a scheduled command", "Wrap a third-party API in the HTTP client with timeouts + retries; S3 upload + signed URL", "Cover the API with Pest feature tests + factories; fake the queue"], "outcome": "Responsive endpoints, offloaded work, and a fast test suite."}, {"n": "WEEK 06", "title": "Artisan, deployment, advanced & capstone", "goal": "Ship it, and build the capstones.", "read": [["Parts 19–22", "Artisan → capstone"]], "readTasks": ["Read Part 19 (Artisan) and Part 20 (Nginx + FPM + Supervisor + Horizon + deploy)", "Read Part 21 (advanced) and Part 22 (capstones)"], "build": ["Write a custom Artisan command; containerize web + worker + scheduler + Postgres + Redis", "Practice an expand→contract migration with <span class='mono'>queue:restart</span>", "Build Capstone A (Task API), then start B (E-commerce, idempotent checkout + locking)", "Deploy one publicly with Horizon; write the README"], "outcome": "A deployable Laravel backend and portfolio-grade capstones."}];
 const FINAL = ["Write modern typed PHP fluently", "Explain shared-nothing vs the Node event loop", "Wire routes, controllers, middleware, DI", "Model data & relations in Eloquent, no N+1", "Build CRUD: Form Request + Resource + Policy", "Pagination, filtering, consistent error envelopes", "Sanctum auth + object-level policies", "Run the security checklist from memory", "Offload work to idempotent queued jobs", "Cache with stampede protection; schedule tasks", "Feature-test the API with Pest + factories", "Deploy Nginx + FPM + Supervisor + Horizon", "Expand→contract migrations with queue:restart", "Two+ capstone projects on GitHub"];
 const KEY = "laravel-sprint-v1"; const THEME_KEY = "laravel-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "PHP-Laravel-Cookbook-for-Node-Developers";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

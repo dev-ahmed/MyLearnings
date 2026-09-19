@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "The workflow, pandas & SQL", "goal": "Frame a question and get + shape data with pandas and analytical SQL.", "read": [["Parts 1–3", "Workflow · pandas · analytical SQL"]], "readTasks": ["Read Part 1 (the analyst workflow, the four kinds of analysis) and Part 2 (pandas core: DataFrame, selecting, vectorising)", "Read Part 3 (analytical SQL: GROUP BY, window functions, CTEs, push work down)"], "build": ["Take a vague question and rewrite it as a precise metric + segment + comparison", "Load a 10k+ row CSV; run head/info/describe/value_counts; build vectorised, datetime, and binned columns", "Filter with & / | and parentheses; time an iterrows version against the vectorised one", "Write a GROUP BY + HAVING, a window query (running total + LAG), and a CTE-staged query — then reproduce one in pandas"], "outcome": "You can frame a question and pull/shape data in pandas and SQL."}, {"n": "WEEK 02", "title": "Clean, reshape & explore", "goal": "Turn messy data into a reliable answer with EDA.", "read": [["Parts 4–6", "Cleaning · reshaping · EDA"]], "readTasks": ["Read Part 4 (missing values, types, duplicates, outliers) and Part 5 (groupby, pivot/melt, joins)", "Read Part 6 (EDA: distributions, relationships, segmenting, Simpson's paradox)"], "build": ["Clean a deliberately messy CSV: coerce types, dedup on a key, normalise categories, decide+document a missing-value strategy, investigate outliers by IQR", "groupby().agg() with named aggregates; pivot to wide and melt back to tidy", "Introduce a duplicate join key, watch the total inflate, fix it, and reconcile against the ungrouped sum", "EDA: plot a distribution's shape, compute a metric overall then by two segments, find where the segmented story differs from the headline"], "outcome": "You can clean, reshape, and explore data without fooling yourself."}, {"n": "WEEK 03", "title": "Stats, viz, time & LLM analysis", "goal": "Make numbers honest, charts clear, and use an LLM safely.", "read": [["Parts 7–11", "Statistics · viz · time series · LLM · reporting"]], "readTasks": ["Read Part 7 (uncertainty, CIs, p-values, correlation≠causation, A/B) and Part 8 (choosing charts, not misleading)", "Read Part 9 (time series), Part 10 (LLM-assisted analysis), Part 11 (reproducible reporting)"], "build": ["Compute a metric with a 95% CI; run a t-test and interpret the p-value in plain English", "Demonstrate p-hacking: test 20 random segments and count the false positives", "Resample a time series to daily/monthly, add a moving average, and find a MoM number that misleads where YoY tells the truth", "Build a tiny text-to-SQL helper (schema in → SQL out → read-only run) and verify its numbers against your own; then write up a finding (headline, evidence, caveats)"], "outcome": "Honest statistics, clear charts, and safe LLM-assisted analysis."}];
 const FINAL = ["Frame a precise question: metric, segment, comparison", "Wrangle data in pandas (select, filter, vectorise)", "Write analytical SQL: GROUP BY, windows, CTEs", "Push aggregation down to the database", "Clean messy data reproducibly (types, missing, dupes, outliers)", "Reshape with groupby, pivot/melt, and joins", "Reconcile totals around every join and group-by", "Explore distributions and segment every average", "Spot Simpson's paradox and misleading aggregates", "Report a confidence interval or sample size, not a bare number", "Separate correlation from causation; run an A/B honestly", "Avoid p-hacking (pre-register, correct for multiplicity)", "Choose the right chart and not mislead (zero-based bars)", "Analyse time series (resample, rolling, YoY vs MoM)", "Use an LLM to write queries — and verify the numbers by running code"];
 const KEY = "da-sprint-v1"; const THEME_KEY = "da-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Applied-Data-Analysis-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

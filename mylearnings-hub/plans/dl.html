@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Tensors & autograd", "goal": "Master the two primitives everything is built on.", "read": [["Parts 1–3", "When DL · tensors · autograd"]], "readTasks": ["Read Part 1 (when deep learning, and when boosting wins) and Part 2 (tensors, shapes, GPU)", "Read Part 3 (autograd, the four-step dance, no_grad/eval)"], "build": ["Create tensors of image/tabular shapes; practise matmul, reduce, reshape, unsqueeze, permute — print .shape each time", "Move a tensor to the device; hit and fix a device-mismatch error", "With autograd, compute a gradient by hand and verify it (y = x²+2x+1)", "Minimise f(w)=(w-5)² by hand: forward, backward, w -= lr*grad, zero the grad — watch w → 5"], "outcome": "Fluent with tensors, shapes, and how gradients are computed."}, {"n": "WEEK 02", "title": "Modules & the training loop", "goal": "Build a network and train it end to end.", "read": [["Parts 4–6", "nn.Module · training loop · data"]], "readTasks": ["Read Part 4 (nn.Module, layers, activations, logits vs loss) and Part 5 (the training loop, optimizers, LR)", "Read Part 6 (Dataset/DataLoader, batching, normalisation, leakage)"], "build": ["Build an MLP with nn.Module; confirm one forward pass gives the right output shape and count its params", "Write the full training loop on a real dataset; track train + val loss per epoch and plot both", "Do the single-batch overfit test first; then break it on purpose with lr=10 (NaN) and lr=1e-6 (crawl)", "Wrap data in a Dataset + DataLoader (shuffle, num_workers); normalise on train only, then reproduce leakage by scaling before the split"], "outcome": "You can build and train a network and read its loss curves."}, {"n": "WEEK 03", "title": "CNNs, overfitting & transfer learning", "goal": "Train image models and stand on pretrained ones.", "read": [["Parts 7–9", "CNNs · regularization · transfer learning"]], "readTasks": ["Read Part 7 (convolutions, pooling, the flattened-size trap) and Part 8 (overfitting, dropout, weight decay, early stopping, train/eval)", "Read Part 9 (transfer learning: freeze, replace the head, fine-tune gently)"], "build": ["Build a CNN on CIFAR-10/Fashion-MNIST; find the post-conv size with a dummy forward pass; add augmentation and measure the gain", "Overfit a big model on small data on purpose, then add dropout + weight decay + early stopping and watch the val curve improve", "Fine-tune a pretrained ResNet: freeze it, replace the head, train just the head — compare speed/accuracy to the from-scratch CNN", "Match the pretrained model's preprocessing exactly; then unfreeze the top block at lr=1e-5 and judge help vs overfit"], "outcome": "You can train CNNs, fight overfitting, and use transfer learning."}, {"n": "WEEK 04", "title": "Ship it", "goal": "Save, reload, and serve a model correctly.", "read": [["Parts 10–11", "GPU/saving/serving · capstone"]], "readTasks": ["Read Part 10 (GPU, saving the state_dict, serving, ONNX)", "Read Part 11 (capstone + cheat sheet)"], "build": ["Save a model's state_dict, reload into a fresh instance with map_location, call eval(), and confirm predictions match", "Serve it behind a FastAPI /predict endpoint using torch.no_grad(), returning probabilities", "Export to ONNX and compare CPU inference speed to PyTorch", "Capstone: fine-tune a backbone on a small custom image set → evaluate → serve, end to end"], "outcome": "A trained, saved, and served deep-learning model — you can ship it."}];
 const FINAL = ["Judge when deep learning beats boosting (and when it doesn't)", "Work with tensors, shapes, and the GPU device", "Explain autograd and the four-step training dance", "Build a network with nn.Module and the right activations", "Output logits and pair them with the right loss", "Write and debug the training loop from scratch", "Read train/val curves for over/underfitting", "Feed data with Dataset/DataLoader; normalise without leakage", "Do the single-batch overfit sanity check", "Build a CNN and get the flattened size right", "Regularize with dropout, weight decay, early stopping", "Use model.train()/eval() and no_grad() correctly", "Fine-tune a pretrained backbone (transfer learning)", "Save/load the state_dict and serve with FastAPI"];
 const KEY = "dl-sprint-v1"; const THEME_KEY = "dl-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Deep-Learning-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

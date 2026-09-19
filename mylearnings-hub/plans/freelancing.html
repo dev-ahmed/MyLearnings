@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Position & pick your platforms", "goal": "Choose a niche with demand and set up where you'll compete.", "read": [["Parts 1–2", "Platform landscape · positioning & niche"]], "readTasks": ["Read Part 1 (the platform types and which fit you) and Part 2 (positioning & niche — the highest-leverage decision)", "Note the current fee/bidding model of your chosen platforms"], "build": ["Write your one-line positioning: 'I help [who] achieve [outcome] with [how]' — draft tech-led, industry-led, and AI/ML-led versions", "Search platforms to confirm your niche has real, paying demand; pick the strongest specificity-plus-demand option", "Choose a primary + secondary platform for the next 90 days and create/complete the primary account", "Decide how you'll lead with your AI/ML edge (RAG/agents/fine-tuning) as a premium niche"], "outcome": "A validated niche and the right platforms chosen."}, {"n": "WEEK 02", "title": "Profile, proposals & pricing", "goal": "Build a storefront and the pitch + price to win jobs.", "read": [["Parts 3–5", "Profile · proposals · pricing"]], "readTasks": ["Read Part 3 (an outcome-led profile) and Part 4 (proposals that win)", "Read Part 5 (pricing without underselling)"], "build": ["Rewrite your profile: outcome-led title + hook overview + 2–3 proof pieces (use AI/ML projects from this library) + a real photo", "Write three tailored proposals (5-part structure, first line specific to the post) for real matched jobs", "Compute your rate floor with the formula; set your starting rate and one value-based pitch", "Have someone read your profile's first two lines and confirm they understand what you do"], "outcome": "A hire-ready profile, proposal formula, and confident pricing."}, {"n": "WEEK 03", "title": "Land the first clients & deliver", "goal": "Break the no-reviews cold start and deliver without drama.", "read": [["Parts 6–8", "First clients · communication · delivery"]], "readTasks": ["Read Part 6 (landing the first clients) and Part 7 (client communication & scoping)", "Read Part 8 (delivery & scope creep)"], "build": ["Publish two spec/proof pieces in your niche; message five people in your network that you freelance now", "Send tailored proposals to small, thin-competition, well-matched jobs at a first-reviews intro rate", "Prepare reusable templates: discovery questions, a written scope, a kickoff recap, and a change-order message", "Run any real conversation through discovery → written scope → milestones before committing"], "outcome": "First jobs in motion with pro delivery habits in place."}, {"n": "WEEK 04", "title": "Reputation & scaling", "goal": "Turn delivery into reviews, repeat clients, and a business.", "read": [["Parts 9–11", "Reputation · scaling · capstone"]], "readTasks": ["Read Part 9 (reputation that compounds) and Part 10 (scaling beyond hours-for-dollars)", "Read Part 11 (capstone, platform quick-pick, red flags)"], "build": ["Write your review-request message (for the delivery high point) and a repeat-work/retainer pitch", "Read your platform's rules on off-platform contact and payment protection so you never risk your standing", "Draft one productized service in your AI/ML niche (scope, deliverable, timeline, fixed price) you can sell repeatedly", "Map your 12-month leverage ladder (rates → value pricing → retainers → productized/upmarket) and set the basics (tax savings, invoicing)"], "outcome": "A plan to compound reviews into repeat income and a real business."}];
 const FINAL = ["Pick the right platform(s) for your skill and stage", "Write a specific, in-demand positioning statement", "Lead with your AI/ML edge as a premium niche", "Build an outcome-led profile with real proof pieces", "Write tailored proposals with a post-specific first line", "Apply early and bid selectively (not spray-and-pray)", "Compute a sustainable rate floor and set your rate", "Price for value, not just hours; raise rates over time", "Land the first 3–5 reviews with proof + targeting + network", "Run discovery and scope every project in writing", "Communicate proactively; never go silent", "Use milestones and handle scope creep with change orders", "Earn reviews and convert clients into repeat/retainer work", "Use platform protections; know the off-platform rules", "Spot client red flags and walk from bad-fit jobs", "Climb the leverage ladder toward a real business"];
 const KEY = "freelancing-sprint-v1"; const THEME_KEY = "freelancing-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Freelancing-Success-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

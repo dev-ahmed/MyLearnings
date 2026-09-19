@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Reproducibility: track & version", "goal": "Make any model reproducible — the highest-leverage MLOps jump.", "read": [["Parts 1–3", "Maturity ladder · tracking · versioning"]], "readTasks": ["Read Part 1 (why ML needs more than DevOps, the 0–3 maturity ladder) and Part 2 (experiment tracking)", "Read Part 3 (versioning data & models, the reproducibility contract)"], "build": ["Rate a model on the 0–3 ladder; name the one next practice to climb a rung", "Wrap training in MLflow: log params, val metrics, the model artifact, data version, and git SHA", "Run it 5× with different hyperparameters; find the best run in the UI and prove you can reconstruct it", "Put the dataset under DVC with a remote; checkout an old commit + dvc pull and retrain to the same model"], "outcome": "Any of your models is fully reproducible and tracked."}, {"n": "WEEK 02", "title": "Pipelines & the registry", "goal": "Automate training and make deploy a promotion, not a file copy.", "read": [["Parts 4–5", "Training pipelines · model registry"]], "readTasks": ["Read Part 4 (notebook → parameterised, idempotent pipeline; orchestrators)", "Read Part 5 (the model registry, stages, promotion, rollback)"], "build": ["Convert a training notebook into a one-command parameterised pipeline (data → train → eval), tracked", "Register the best model; promote v1 to Production; train v2 and promote it, keeping v1 for rollback", "Write a loader that fetches 'the Production version' by name+stage (no file path)", "Transition back to v1 in one call to prove clean rollback"], "outcome": "One-command training and registry-based promotion/rollback."}, {"n": "WEEK 03", "title": "Serving & monitoring", "goal": "Serve the Production model and watch it for drift.", "read": [["Parts 6–7", "Serving/deployment · monitoring & drift"]], "readTasks": ["Read Part 6 (online vs batch, safe rollouts, training/serving skew)", "Read Part 7 (operational vs model-quality monitoring, the three drifts, the label delay)"], "build": ["Serve the Production model behind a FastAPI /predict (load by name+stage), containerized; also implement it as a batch scorer", "Introduce a training/serving skew on purpose, watch accuracy drop, then fix it by sharing preprocessing code", "Log every prediction with inputs + model version + id; compute a training feature-distribution baseline", "Feed shifted inputs and detect data drift vs baseline; simulate delayed labels and join to compute real accuracy"], "outcome": "A served, monitored model with drift detection."}, {"n": "WEEK 04", "title": "CI/CD & feature stores", "goal": "Automate gated retraining; know when a feature store is (not) worth it.", "read": [["Parts 8–10", "CI/CD & continuous training · feature stores · capstone"]], "readTasks": ["Read Part 8 (CI for data+model quality, continuous training, the eval gate)", "Read Part 9 (feature stores, and when they're overkill) and Part 10 (capstone + cheat sheet)"], "build": ["Build a CI check: validate data schema → train → eval on a fixed held-out set → FAIL unless it beats Production", "Wire a trigger (schedule or a drift signal from wk3) to run it; confirm a deliberately worse candidate is rejected", "Solve training/serving skew the cheap way: one shared preprocessing module imported by train and serve", "Capstone: take one model notebook → tracked → versioned → pipelined → registered → served → monitored → gated-retrain"], "outcome": "Gated, automated retraining — a model you can operate end to end."}];
 const FINAL = ["Place a project on the 0–3 MLOps maturity ladder", "Track every run (params, metrics, artifact, data version, git SHA)", "Version data with DVC and satisfy the reproducibility contract", "Turn a notebook into a parameterised, idempotent pipeline", "Register models and promote through Staging → Production", "Roll back to a previous model version in one step", "Serve the Production model by name+stage (online) and as batch", "Share preprocessing to avoid training/serving skew", "Log every prediction for drift + delayed-label accuracy", "Detect data, concept, and prediction drift", "Add CI checks for data and model quality", "Gate every promotion on beating the current Production model", "Automate retraining on schedule or drift (safely)", "Judge when a feature store is worth it (usually not yet)"];
 const KEY = "mlops-sprint-v1"; const THEME_KEY = "mlops-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "MLOps-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

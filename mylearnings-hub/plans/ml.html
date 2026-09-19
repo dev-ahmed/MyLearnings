@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "Foundations & data", "goal": "Frame a problem, set up the toolkit, and truly understand your data.", "read": [["Parts 1–4", "Workflow → data/EDA"]], "readTasks": ["Read Part 1 (the workflow) and Part 2 (just-enough math)", "Read Part 3 (toolkit) and Part 4 (data, EDA, leakage)"], "build": ["Set up uv + numpy/pandas/scikit-learn/jupyter; run the 12-line Iris example", "Pick a real dataset; frame it: target, metric, baseline, do you have labels?", "Load it, clean it (missing, dupes, types), and do EDA (hist grid, correlation, target plots)", "Compute the dumb baseline and split train/val/test BEFORE any transform"], "outcome": "A framed problem, clean data, EDA insight, and a baseline to beat."}, {"n": "WEEK 02", "title": "Features & supervised learning", "goal": "Engineer features and train models that beat the baseline.", "read": [["Parts 5–7", "Features / regression / classification"]], "readTasks": ["Read Part 5 (feature engineering + Pipelines)", "Read Parts 6–7 (regression, classification + the imbalance trap)"], "build": ["Build a single Pipeline (impute + scale + one-hot) — no leakage", "Train linear/logistic, random forest, and gradient boosting; compare on held-out data", "For classification: print the confusion matrix, precision, recall, F1, ROC-AUC (not just accuracy)", "Handle imbalance with class weights + threshold tuning"], "outcome": "Leak-free features and models measured with the right metrics."}, {"n": "WEEK 03", "title": "Evaluation, unsupervised & deep learning", "goal": "Tune honestly, explore structure, and taste neural nets.", "read": [["Parts 8–10", "Evaluation / unsupervised / deep learning"]], "readTasks": ["Read Part 8 (overfitting, cross-validation, tuning)", "Read Parts 9–10 (clustering/PCA, a taste of deep learning)"], "build": ["Diagnose over/underfitting via train-vs-CV gap; regularize to close it", "Run GridSearchCV with 5-fold CV; report the winner ONCE on the test set", "Cluster an unlabeled set (scale → k-means → elbow → name the clusters); PCA to 2-D and plot", "Train a small Keras net on the same tabular data and see the tree still win"], "outcome": "Honest cross-validated tuning and intuition for when DL helps."}, {"n": "WEEK 04", "title": "MLOps & capstone", "goal": "Serve, monitor, and ship a model end to end.", "read": [["Parts 11–12", "MLOps / pitfalls & ethics"]], "readTasks": ["Read Part 11 (serving, versioning, drift/monitoring)", "Read Part 12 (pitfalls, responsible ML, cheat sheet)"], "build": ["joblib.dump the whole Pipeline; build a FastAPI /predict with Pydantic validation", "Containerize the serving API (Docker); load the model once at startup", "Add prediction logging (input + output + model version); describe what a drift monitor flags", "Do a responsible-ML pass: check performance across subgroups; decide human-in-the-loop where needed"], "outcome": "A served, versioned, monitored model — a real end-to-end ML project."}];
 const FINAL = ["Frame a problem: target, metric, baseline", "Load, clean, and EDA real data", "Split before transforming; avoid leakage", "Build a leak-free preprocessing Pipeline", "Train regression & classification models", "Judge classifiers by precision/recall/F1/AUC", "Diagnose over/underfitting via train-vs-CV", "Tune with cross-validation; test set once", "Cluster & reduce dimensions (unsupervised)", "Know when deep learning is (and isn't) worth it", "Save the whole pipeline; serve via FastAPI", "Version + log predictions; watch for drift", "Check fairness across subgroups", "One end-to-end ML project shipped"];
 const KEY = "ml-sprint-v1"; const THEME_KEY = "ml-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "Machine-Learning-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>

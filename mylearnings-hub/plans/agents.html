@@ -147,8 +147,63 @@ footer{margin-top:36px; text-align:center; color:var(--muted); font-size:.8rem; 
 const WEEKS = [{"n": "WEEK 01", "title": "The loop, tools & structured output", "goal": "Build a real agent from scratch — the irreducible core.", "read": [["Parts 1–4", "Agent vs pipeline · the loop · tools · structured output"]], "readTasks": ["Read Part 1 (agent vs pipeline vs call — the autonomy ladder) and Part 2 (the reason/act/observe loop, bounding it)", "Read Part 3 (tools, schemas, validation, least privilege) and Part 4 (structured output)"], "build": ["Classify three of your own tasks: single call, pipeline, router, or true agent — and justify each", "Implement the ReAct loop from scratch with two tools, max_steps, and per-step logging; handle an unknown-tool request gracefully", "Define three tools with Pydantic-schema args and teammate-quality descriptions; validate args and return recoverable errors", "Rewrite the 'am I done?' decision to use structured output ({done: bool}) instead of parsing prose"], "outcome": "A working, bounded, tool-using agent you built by hand."}, {"n": "WEEK 02", "title": "Memory, planning & multi-agent", "goal": "Add capability — but only where a simple loop falls short.", "read": [["Parts 5–8", "Memory · planning · multi-agent · frameworks"]], "readTasks": ["Read Part 5 (context as memory, summarisation, retrieval) and Part 6 (plan-then-execute, re-planning)", "Read Part 7 (multi-agent topologies and their costs) and Part 8 (frameworks, and when to skip them)"], "build": ["Give the agent a long conversation; add summarisation when history exceeds a threshold, plus a retrieval tool over a small doc set", "Build a plan-then-execute agent (structured steps list → execute each) and compare to the plain reactive loop", "Build a writer→critic two-agent pipeline; compare output quality AND token cost to a single agent", "Reimplement the hand-rolled agent in a framework (e.g. LangGraph); compare lines, debuggability, and model calls"], "outcome": "You can add memory, planning, multi-agent, and frameworks deliberately."}, {"n": "WEEK 03", "title": "Evaluate & ship safely", "goal": "Measure a non-deterministic agent and harden it for production.", "read": [["Parts 9–11", "Evaluation · production/safety · capstone"]], "readTasks": ["Read Part 9 (eval sets, success rate, LLM-as-judge, failure modes) and Part 10 (cost, prompt injection, least privilege, human-in-the-loop, observability)", "Read Part 11 (capstone + cheat sheet)"], "build": ["Build a 15–20 task eval set with programmatic checks; run each 3× and report success rate + variance + cost", "Change one prompt/tool and re-run the eval to prove improvement vs regression", "Harden the agent: hard budgets, an approval gate on irreversible actions, least-privilege tools, structured logging", "Attack it — feed a tool result with an injected 'ignore your instructions' — and confirm your guards, not the model, stop it"], "outcome": "An evaluated, budgeted, injection-resistant agent you can ship."}];
 const FINAL = ["Tell an agent from a pipeline or a single call (earn the loop)", "Implement the reason/act/observe loop from scratch", "Bound every agent with a step limit and a budget", "Define least-privilege tools with validated, schema'd arguments", "Handle unknown tools and bad arguments gracefully", "Use structured output for every decision code acts on", "Manage context: summarise and retrieve instead of accumulating", "Add plan-then-execute only when a reactive loop drops steps", "Judge when multi-agent is worth its cost (usually not)", "Choose a framework deliberately — or skip it", "Build an eval set and score success rate across repeated runs", "Control cost: budgets, cheaper models, caching", "Defend against prompt injection architecturally", "Gate irreversible actions behind a human or a rule", "Log every step: reasoning, tool, args, observation, cost"];
 const KEY = "agents-sprint-v1"; const THEME_KEY = "agents-theme";
-let state = {}; try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const BOOK = "AI-Agents-Cookbook";
+const PLAN = KEY.replace(/-sprint-v\d+$/, "");
+const API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? `http://${location.hostname}:8700/api/progress`
+  : "/api/progress";
+let state = {};
+// Progress lives in sqlite behind the progress API, so it follows you across
+// browsers and machines instead of being stranded in one browser profile.
+function save(id, checked){
+  if (id === undefined) return;
+  fetch(API_BASE, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ planName: PLAN, itemText: id, completed: !!checked })
+  }).catch(e => console.error("Failed to save progress", e));
+}
+async function loadState(){
+  try {
+    const res = await fetch(`${API_BASE}/${PLAN}`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    state = {};
+    rows.forEach(r => { if (r.completed) state[r.item_text] = true; });
+    applyState();
+  } catch(e) { console.error("Failed to load progress", e); }
+}
+// Reading the sprint's book ticks its read-tasks proportionally: getting 25%
+// through the book completes the first quarter of them. It only ever adds
+// ticks, so reading back over earlier chapters never unticks your progress.
+async function applyReadingProgress(){
+  if (!BOOK) return;
+  try {
+    const res = await fetch(`${API_BASE}/books`);
+    if (!res.ok) return;
+    const rows = await res.json();
+    const row = rows.find(r => r.item_text === BOOK);
+    const pct = row ? (row.progress_percentage || 0) : 0;
+    if (pct <= 0) return;
+
+    const readIds = [...document.querySelectorAll('input[type=checkbox]')]
+      .map(b => b.id).filter(id => /^w\d+r\d+$/.test(id));
+    const covered = Math.floor(readIds.length * pct / 100);
+
+    readIds.slice(0, covered).forEach(id => {
+      if (!state[id]) { state[id] = true; save(id, true); }
+    });
+    applyState();
+  } catch(e) { console.error("Failed to apply reading progress", e); }
+}
+function applyState(){
+  document.querySelectorAll('input[type=checkbox]').forEach(b => {
+    const on = !!state[b.id];
+    b.checked = on;
+    b.closest(".task")?.classList.toggle("checked", on);
+  });
+  refresh();
+}
 const weeksEl = document.getElementById("weeks");
 function taskItem(id, html){ const c = !!state[id];
   return `<li class="task${c?' checked':''}"><input type="checkbox" id="${id}" ${c?'checked':''}><label for="${id}">${html}</label></li>`; }
@@ -187,9 +242,10 @@ function refresh(){
   });
 }
 document.addEventListener("change", e=>{ if(e.target.matches('input[type=checkbox]')){
-  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(); refresh(); }});
+  state[e.target.id] = e.target.checked; e.target.closest(".task")?.classList.toggle("checked", e.target.checked); save(e.target.id, e.target.checked); refresh(); }});
 document.getElementById("reset").addEventListener("click", ()=>{ if(!confirm("Reset all progress?")) return;
-  state = {}; save(); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
+  const ids = [...document.querySelectorAll('input[type=checkbox]')].map(b => b.id);
+  state = {}; ids.forEach(id => save(id, false)); document.querySelectorAll('input[type=checkbox]').forEach(b=>{ b.checked=false; b.closest(".task")?.classList.remove("checked"); }); refresh(); });
 let allOpen=false;
 document.getElementById("expandAll").addEventListener("click", (e)=>{ allOpen=!allOpen;
   document.querySelectorAll("details.week").forEach(d=> d.open=allOpen); e.target.textContent = allOpen? "Collapse all":"Expand all"; });
@@ -200,4 +256,5 @@ document.getElementById("theme").addEventListener("click", ()=>{ const cur = roo
   root.setAttribute("data-theme", next); try{ localStorage.setItem(THEME_KEY, next); }catch(e){} });
 document.getElementById("stamp") && (document.getElementById("stamp").textContent = "");
 refresh();
+loadState().then(applyReadingProgress);
 </script>
