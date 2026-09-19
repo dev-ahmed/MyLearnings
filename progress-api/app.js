@@ -21,6 +21,7 @@ function createApp(dbPath) {
         completed_at TIMESTAMP,
         progress_percentage REAL DEFAULT 0,
         cfi TEXT,
+        annotations TEXT,
         UNIQUE(plan_name, item_text)
       )
     `);
@@ -30,7 +31,7 @@ function createApp(dbPath) {
     const { planName } = req.params;
 
     db.all(
-      'SELECT item_text, completed, completed_at, progress_percentage, cfi FROM progress WHERE plan_name = ?',
+      'SELECT item_text, completed, completed_at, progress_percentage, cfi, annotations FROM progress WHERE plan_name = ?',
       [planName],
       (err, rows) => {
         if (err) {
@@ -42,7 +43,7 @@ function createApp(dbPath) {
   });
 
   app.post('/api/progress', (req, res) => {
-    const { planName, itemText, completed, progressPercentage, cfi } = req.body;
+    const { planName, itemText, completed, progressPercentage, cfi, annotations } = req.body;
 
     if (!planName || !itemText) {
       return res.status(400).json({ error: 'planName and itemText are required' });
@@ -52,12 +53,12 @@ function createApp(dbPath) {
     const percentage = progressPercentage !== undefined ? progressPercentage : 0;
 
     db.run(
-      `INSERT INTO progress (plan_name, item_text, completed, completed_at, progress_percentage, cfi)
-       VALUES (?, ?, ?, ?, ?, ?)
+      `INSERT INTO progress (plan_name, item_text, completed, completed_at, progress_percentage, cfi, annotations)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(plan_name, item_text)
-       DO UPDATE SET completed = ?, completed_at = ?, progress_percentage = ?, cfi = ?`,
-      [planName, itemText, completed ? 1 : 0, completedAt, percentage, cfi || null,
-       completed ? 1 : 0, completedAt, percentage, cfi || null],
+       DO UPDATE SET completed = ?, completed_at = ?, progress_percentage = ?, cfi = ?, annotations = ?`,
+      [planName, itemText, completed ? 1 : 0, completedAt, percentage, cfi || null, annotations || null,
+       completed ? 1 : 0, completedAt, percentage, cfi || null, annotations || null],
       function(err) {
         if (err) {
           return res.status(500).json({ error: err.message });
