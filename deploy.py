@@ -94,6 +94,10 @@ def stage(into: Path) -> Path:
     for html in sorted((HUB / "plans").glob("*.html")):
         shutil.copy2(html, into / "www" / "plans" / html.name)
     shutil.copy2(HUB / "index.html", into / "www" / "index.html")
+    if (HUB / "favicon.svg").exists():
+        shutil.copy2(HUB / "favicon.svg", into / "www" / "favicon.svg")
+    if (ROOT / "plans" / "sprints-metadata.json").exists():
+        shutil.copy2(ROOT / "plans" / "sprints-metadata.json", into / "www" / "plans" / "sprints-metadata.json")
     shutil.copy2(HUB / "server" / "index.js", into / "hub" / "server" / "index.js")
     shutil.copytree(ROOT / "cookbooks", into / "cookbooks", dirs_exist_ok=True)
 
