@@ -1,0 +1,8 @@
+services:
+  prefect-plan:
+    build: .
+    image: prefect-plan:latest
+    container_name: prefect-plan
+    ports:
+      - "8662:80"          # visit http://localhost:8662
+    restart: unless-stopped

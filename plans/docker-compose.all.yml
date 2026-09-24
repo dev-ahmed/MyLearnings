@@ -123,5 +123,18 @@ services:
     ports: ["8660:80"]
     restart: unless-stopped
 
+  temporal-plan:
+    build: ./temporal-plan-app
+    image: temporal-plan:latest
+    container_name: temporal-plan
+    ports: ["8661:80"]
+    restart: unless-stopped
+  prefect-plan:
+    build: ./prefect-plan-app
+    image: prefect-plan:latest
+    container_name: prefect-plan
+    ports: ["8662:80"]
+    restart: unless-stopped
+
 volumes:
   progress-data:

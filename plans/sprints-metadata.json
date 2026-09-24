@@ -131,6 +131,42 @@
       "duration": "4 weeks",
       "hours": 80,
       "tags": ["automation", "workflows", "integration"]
+    },
+    {
+      "id": "prefect",
+      "name": "Prefect Workflows Sprint",
+      "description": "Python pipelines with retries, caching and schedules",
+      "port": 8662,
+      "order": 12,
+      "prerequisites": ["python"],
+      "difficulty": "intermediate",
+      "duration": "3 weeks",
+      "hours": 18,
+      "tags": ["workflows", "pipelines", "python", "orchestration"]
+    },
+    {
+      "id": "temporal",
+      "name": "Temporal Durable Workflows Sprint",
+      "description": "Durable execution — workflows that survive crashes",
+      "port": 8661,
+      "order": 13,
+      "prerequisites": ["python", "backend-infra"],
+      "difficulty": "advanced",
+      "duration": "4 weeks",
+      "hours": 24,
+      "tags": ["workflows", "durable-execution", "backend", "orchestration"]
+    },
+    {
+      "id": "terms",
+      "name": "Technical Terms Sprint",
+      "description": "The whole library's vocabulary in plain words",
+      "port": 8660,
+      "order": 14,
+      "prerequisites": [],
+      "difficulty": "beginner",
+      "duration": "3 weeks",
+      "hours": 12,
+      "tags": ["glossary", "reference", "fundamentals"]
     }
   ]
 }

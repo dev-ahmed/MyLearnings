@@ -1,0 +1,8 @@
+services:
+  temporal-plan:
+    build: .
+    image: temporal-plan:latest
+    container_name: temporal-plan
+    ports:
+      - "8661:80"          # visit http://localhost:8661
+    restart: unless-stopped

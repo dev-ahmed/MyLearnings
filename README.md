@@ -1,9 +1,10 @@
 # MyLearnings
 
-Your backend-engineering learning library — twenty cookbooks (PDF + EPUB),
-nineteen interactive study plans (as self-hosted Docker apps), a QR launcher, and
+Your backend-engineering learning library — twenty-two cookbooks (PDF + EPUB),
+twenty-one interactive study plans (as self-hosted Docker apps), a QR launcher, and
 a tunnel tool to reach them from your phone. Framed for a developer fluent in
 Node.js/TypeScript moving into Python, PHP/Laravel, Rust, backend infrastructure,
+workflow orchestration (Prefect and Temporal),
 and the full AI/ML-engineering stack — the math foundation, data analysis, data
 engineering, machine learning, deep learning, reinforcement learning, RAG, agents,
 fine-tuning, MLOps, cloud/Kubernetes, a career track on freelancing, and a technical-terms glossary.
@@ -20,6 +21,8 @@ MyLearnings/
 │   │   ├── queues/                  Background Jobs & Queues Cookbook
 │   │   ├── mailpit/                 Mailpit Cookbook
 │   │   ├── n8n/                     n8n Automation Cookbook
+│   │   ├── prefect/                 Prefect Workflows Cookbook (Python pipelines)
+│   │   ├── temporal/                Temporal Durable Workflows Cookbook
 │   │   └── cloud-kubernetes/        Cloud & Kubernetes for ML Cookbook
 │   ├── ai-and-ml/
 │   │   ├── rag/                     RAG Backend Cookbook
@@ -58,6 +61,8 @@ MyLearnings/
 │   ├── math-plan-app/               → http://localhost:8658  (math for ML)
 │   ├── freelancing-plan-app/        → http://localhost:8659  (freelancing success)
 │   ├── terms-plan-app/              → http://localhost:8660  (technical terms glossary)
+│   ├── temporal-plan-app/           → http://localhost:8661  (durable workflows)
+│   ├── prefect-plan-app/            → http://localhost:8662  (Python pipelines)
 │   └── docker-compose.all.yml       # run ALL plans at once
 ├── tools/
 │   └── tunnel/                      tunnel.sh — reach the plans from your phone
@@ -81,6 +86,8 @@ MyLearnings/
 | RAG | `ai-and-ml/rag/` | RAG Sprint | 8646 | 3 wks |
 | Machine Learning | `ai-and-ml/machine-learning/` | Machine Learning Sprint | 8647 | 4 wks |
 | n8n (workflow automation) | `infrastructure/n8n/` | n8n Automation Sprint | 8649 | 3 wks |
+| Prefect (Python pipelines) | `infrastructure/prefect/` | Prefect Workflows Sprint | 8662 | 3 wks |
+| Temporal (durable workflows) | `infrastructure/temporal/` | Temporal Durable Workflows Sprint | 8661 | 4 wks |
 | Math for ML | `foundations/math-for-ml/` | Math for ML Sprint | 8658 | 3 wks |
 | Data Analysis | `data/data-analysis/` | Data Analysis Sprint | 8651 | 3 wks |
 | Data Engineering | `data/data-engineering/` | Data Engineering Sprint | 8656 | 4 wks |
@@ -124,6 +131,7 @@ docker compose -f docker-compose.all.yml up -d --build
 # Python 8642 · Docker 8643 · Infra 8644 · Laravel 8645 · RAG 8646 · ML 8647 · Rust 8648
 # n8n 8649 · RL 8650 · DataAnalysis 8651 · DeepLearning 8652 · AIAgents 8653 · FineTuning 8654
 # MLOps 8655 · DataEng 8656 · CloudK8s 8657 · MathForML 8658 · Freelancing 8659 · Terms 8660
+# Temporal 8661 · Prefect 8662
 ```
 
 Stop everything with `docker compose -f docker-compose.all.yml down`.
@@ -255,6 +263,15 @@ model (it maps cleanly from your TypeScript).
 **n8n** is a standalone track best taken *after* Backend Infra — it's the visual,
 trigger-driven counterpart to the code-first queues and glue you learn there, and
 its Week 3 AI workflows build on the RAG plan.
+
+**Prefect** and **Temporal** are the code-first follow-ups to n8n, both in Python.
+Take **Prefect** (after Python) for scheduled data, ML and AI pipelines with
+retries, caching and a UI. It pairs with Data Engineering and MLOps. Take
+**Temporal** (after Python and Backend Infra) for durable business processes
+that survive crashes and wait days for people: orders, approvals, long AI
+agents. Its capstone builds your own mini-n8n engine. Rule of thumb: n8n for
+fast app glue, Prefect for pipelines, Temporal for processes that must never
+lose their place.
 
 *Built as a matched set: every plan maps chapter-by-chapter to its cookbook, and
 every cookbook is framed against a language you already know.*
